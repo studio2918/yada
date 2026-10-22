@@ -163,6 +163,11 @@ const CORE = {
   8: ["Taking on a big challenge and making it happen.", "Standing up for someone who can't stand up for themselves.", "Leading people through something hard."],
   9: ["Helping people who disagree find common ground.", "Bringing calm to a tense situation.", "Making everyone feel included and at ease."],
 };
+// Struggle lines for the final round, written to be equally hard to admit.
+// Round 1 asks about a gift; rounds 2 and 3 ask about struggles.
+const STRUGGLE = {"1": ["I get critical of myself and others when things aren't done right.", "I hold in my frustration until it comes out sideways."], "2": ["I give and give, then quietly resent it when no one notices.", "I struggle to say what I actually need."], "3": ["I measure my worth by what I get done.", "I shape myself into whatever will impress the people around me."], "4": ["I dwell on what's missing in my life.", "I feel misunderstood, even by the people closest to me."], "5": ["I pull away when people need too much from me.", "I hold back from jumping in until I've figured it all out."], "6": ["My mind runs ahead to everything that could go wrong.", "I second-guess myself and look for reassurance."], "7": ["I move on to something new when things get hard or boring.", "I avoid sitting with painful feelings."], "8": ["I come on too strong and can steamroll people.", "I struggle to let people see me vulnerable."], "9": ["I go along with others to avoid conflict.", "I lose track of what I actually want."]};
+const duelLine = (t, k) => k === 0 ? CORE[t][0] : STRUGGLE[t][k - 1];
+
 // Tiebreakers for commonly confused pairs, asked only when both reach the final round.
 const TIE = {
   "1-7": [[1, "When plans fall apart, my first thought is what should have been done differently."], [7, "When plans fall apart, my first thought is what else we could try."],
@@ -545,12 +550,14 @@ function statement(p) {
 function duel(p) {
   const flip = hash(p.key + p.k) % 2, [x, y] = flip ? [p.b, p.a] : [p.a, p.b];
   return `${stageBar(p)}
-  <h2>Which lights ${other() ? h(who()) : "you"} up more?</h2>
-  <p class="muted small">If both are true, pick the one that comes first without effort, the one that's been true the longest. If you really can't choose, “Both equally” is a fine answer.</p>
+  ${p.k === 0 ? `<h2>Which lights ${other() ? h(who()) : "you"} up more?</h2>
+  <p class="muted small">If both are true, pick the one that comes first without effort, the one that's been true the longest. If you really can't choose, “Both equally” is a fine answer.</p>`
+  : `<h2>Which is more honestly ${other() ? "their" : "your"} struggle?</h2>
+  <p class="muted small">Pick the one that would be harder to admit, or the one people close to ${other() ? "them" : "you"} would say. If both fit equally, that's a fine answer too.</p>`}
   <div class="versus">
-    <button type="button" class="side" data-duel="${x === p.a ? "a" : "b"}">${h(CORE[x][p.k])}</button>
+    <button type="button" class="side" data-duel="${x === p.a ? "a" : "b"}">${h(duelLine(x, p.k))}</button>
     <div class="or">or</div>
-    <button type="button" class="side" data-duel="${y === p.a ? "a" : "b"}">${h(CORE[y][p.k])}</button>
+    <button type="button" class="side" data-duel="${y === p.a ? "a" : "b"}">${h(duelLine(y, p.k))}</button>
   </div>
   <div class="alt">
     <button type="button" class="secondary" data-duel="both">Both equally</button>
