@@ -4,6 +4,6 @@
 
 This repository hosts the standalone type finder: a single self-contained page with no server. Progress stays in your browser.
 
-**Take it:** https://useforesight2020.github.io/yada/
+**Take it:** https://studio2918.github.io/yada/
 
 Helping test? At the end, tap "Helping test this?" and send back the code it gives you.
