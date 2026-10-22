@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Discover what drives you: a short, Christ-centered Enneagram type finder from Yada.">
+</head>
+<body>
+<title>Yada Type Finder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ovo&family=Karla:wght@400;500;700&family=Frank+Ruhl+Libre:wght@900&display=swap">
+<style>
+/* Layout: one narrow reading column, one decision per screen, like a page in a journal. */
+:root {
+  --bg: #f7f2ea; --surface: #fffdf9; --ink: #2d2620; --ink-soft: #5f554b; --line: #e3d9cb;
+  --brand: #6b4f2e; --brand-ink: #f3e9d8; --pick: #55704f; --focus: #2f5c7c;
+  --display: "Ovo", Georgia, "Times New Roman", serif;
+  --body: "Karla", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1d1915; --surface: #27221d; --ink: #efe6d9; --ink-soft: #b5a998; --line: #3d352d;
+  --brand: #c9a77a; --brand-ink: #1d1915; --pick: #9cbf93; --focus: #8fb8d6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1d1915; --surface: #27221d; --ink: #efe6d9; --ink-soft: #b5a998; --line: #3d352d;
+  --brand: #c9a77a; --brand-ink: #1d1915; --pick: #9cbf93; --focus: #8fb8d6; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55; }
+main { max-width: 640px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: flex; flex-direction: column; gap: 22px; }
+header { display: flex; align-items: center; gap: 12px; }
+.mark { width: 40px; height: 40px; border-radius: 10px; background: var(--brand); color: var(--brand-ink); display: grid; place-items: center; font-family: "Frank Ruhl Libre", "Times New Roman", serif; font-size: 26px; font-weight: 900; line-height: 1; }
+.brand { font-family: var(--display); font-size: 22px; }
+.brand small { display: block; font-family: var(--body); font-size: 13px; color: var(--ink-soft); }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: 34px; } h2 { font-size: 26px; } h3 { font-size: 22px; }
+p { margin: 0; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 14px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: inherit; font-weight: 700; border-radius: 999px; border: 1px solid var(--brand); background: var(--brand); color: var(--brand-ink); padding: 10px 20px; cursor: pointer; }
+button.secondary { background: transparent; color: var(--brand); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+label { font-weight: 500; }
+input[type=text], select, textarea { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; box-sizing: border-box; }
+textarea { min-height: 70px; font-size: 14px; }
+.cards { display: grid; gap: 10px; }
+.card { text-align: left; font-weight: 400; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; align-items: start; }
+.card .box { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--line); margin-top: 2px; display: grid; place-items: center; font-size: 14px; color: var(--bg); }
+.card[aria-pressed="true"] { border-color: var(--pick); box-shadow: inset 0 0 0 1px var(--pick); }
+.card[aria-pressed="true"] .box { background: var(--pick); border-color: var(--pick); }
+.mode { text-align: left; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 16px; font-weight: 400; display: flex; flex-direction: column; gap: 4px; }
+.mode strong { font-family: var(--display); font-weight: 400; font-size: 20px; }
+.mode[aria-pressed="true"] { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.progress div { height: 100%; background: var(--brand); transition: width .25s; }
+.versus { display: grid; gap: 10px; }
+.side { text-align: left; font-weight: 400; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 18px; font-family: var(--display); font-size: 21px; line-height: 1.35; }
+.side[aria-pressed="true"] { border-color: var(--pick); box-shadow: inset 0 0 0 2px var(--pick); }
+.or { text-align: center; font-size: 13px; color: var(--ink-soft); }
+.alt { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.alt button { font-weight: 500; }
+.alt button[aria-pressed="true"] { background: var(--ink-soft); border-color: var(--ink-soft); color: var(--bg); }
+.rate { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.rate button { font-weight: 700; font-size: 16px; padding: 13px 16px; text-align: left; background: transparent; color: var(--ink-soft); border-color: var(--line); }
+.rate button[aria-pressed="true"] { background: var(--pick); border-color: var(--pick); color: var(--bg); }
+.statement { font-family: var(--display); font-size: 26px; line-height: 1.35; text-wrap: balance; min-height: 3.2em; }
+.stages { display: flex; gap: 6px; }
+.stages span { flex: 1; height: 6px; border-radius: 99px; background: var(--line); }
+.stages span.on { background: var(--brand); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; color: var(--ink-soft); }
+.chip.on { border-color: var(--pick); color: var(--ink); }
+.tag { align-self: flex-start; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; color: var(--ink-soft); }
+.note { border-left: 3px solid var(--brand); padding: 4px 0 4px 14px; }
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar { display: grid; grid-template-columns: 26px minmax(0, 1fr) 72px; gap: 10px; align-items: center; font-variant-numeric: tabular-nums; font-size: 14px; }
+.bar .track { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--ink-soft); border-radius: 99px; }
+.bar.top .fill { background: var(--brand); }
+.bar b { font-family: var(--display); font-size: 18px; font-weight: 400; }
+code.share { display: block; font-size: 13px; word-break: break-all; background: var(--bg); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; }
+.read { max-width: 62ch; display: flex; flex-direction: column; gap: 18px; font-size: 18px; line-height: 1.7; }
+.read h2 { font-size: 27px; margin-top: 14px; }
+.read .lede { font-size: 20px; }
+.read .quote { font-family: var(--display); font-size: 25px; line-height: 1.4; border-left: 3px solid var(--brand); padding: 2px 0 2px 18px; margin: 4px 0; text-wrap: balance; }
+.read .quote cite { display: block; font-family: var(--body); font-style: normal; font-size: 14px; color: var(--ink-soft); margin-top: 6px; }
+.read .isnt { display: flex; flex-direction: column; gap: 14px; }
+.read .isnt strong { font-family: var(--display); font-weight: 400; font-size: 20px; }
+.read .orn { text-align: center; color: var(--ink-soft); font-family: "Frank Ruhl Libre", serif; font-weight: 900; font-size: 30px; line-height: 1; color: var(--brand); margin: 8px 0; }
+.read .close { font-family: var(--display); font-size: 21px; line-height: 1.5; text-align: center; text-wrap: balance; }
+.readbar { position: fixed; left: 0; right: 0; top: 0; height: calc(4px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 10; box-sizing: border-box; }
+.readbar div { height: 4px; width: 0; background: var(--brand); }
+@media (prefers-reduced-motion: reduce) { .progress div { transition: none; } }
+</style>
+
+<main id="app" aria-live="polite"></main>
+
+<script>
+// Ten everyday statements per type, alternating a good day and a hard day.
+// The first two of each type are asked of everyone; the rest only if that
+// type is still in the running.
+const BANK = {
+  1: ["I notice how things could be done better, and I like improving them.", "I'm hard on myself when I make a mistake.",
+      "I keep my word, even when it costs me.", "I get irritated when people are careless or cut corners.",
+      "Doing things the right way matters more to me than doing them fast.", "There's a critical voice in my head that's rarely satisfied.",
+      "People trust my sense of what's fair.", "I find it hard to relax until the work is done.",
+      "I follow through on what I start.", "I hold my frustration in, and it leaks out later."],
+  2: ["I notice what people need before they ask.", "I have a hard time saying what I need.",
+      "I love being the one who shows up for people.", "I feel hurt when my help isn't noticed.",
+      "People tell me I make them feel cared for.", "I say yes to people even when I'm running on empty.",
+      "I remember the little details of people's lives.", "Putting myself first makes me feel guilty.",
+      "I make people feel welcome.", "I sometimes help so that people will like me."],
+  3: ["I like setting goals and hitting them.", "I struggle to slow down and just be.",
+      "I can rally people around a goal.", "I care a lot about how I come across.",
+      "I adapt quickly to whatever a situation needs.", "When I fail, it feels like it says something about my worth.",
+      "I get a lot done in a day.", "I stay busy so I don't have to deal with feelings.",
+      "I know how to present an idea so people buy in.", "I judge my day by how much I accomplished."],
+  4: ["I feel things deeply and notice beauty others miss.", "I often feel like something is missing in me.",
+      "I'd rather have a real conversation than small talk.", "I feel misunderstood, even by people close to me.",
+      "People come to me when something hurts.", "I compare my life to others' and feel I come up short.",
+      "I express myself in creative ways.", "My moods color my whole day.",
+      "I'm drawn to what's meaningful and authentic.", "I long for what I don't have."],
+  5: ["I love understanding how things really work.", "I need a lot of time alone to recharge.",
+      "I stay calm and think clearly when others panic.", "I get drained when people need too much from me.",
+      "I'd rather understand one thing deeply than a little about a lot.", "I'd rather watch and think than jump in.",
+      "I research before I make a decision.", "I keep my feelings to myself.",
+      "People value my honest, objective take.", "I hold on to my time and energy in case I need it later."],
+  6: ["People know they can count on me.", "I have a hard time trusting people.",
+      "I'm good at spotting problems before they happen.", "I often imagine what could go wrong.",
+      "I stay loyal to people even when it's hard.", "I second-guess my decisions.",
+      "I like being prepared for what's ahead.", "I look for reassurance before I decide.",
+      "I'll ask the hard questions others avoid.", "I wonder about people's real motives."],
+  7: ["I'm usually the one with the big idea.", "I lose interest once the excitement wears off.",
+      "I see possibilities where others see dead ends.", "I'd rather plan the next thing than sit with something painful.",
+      "I get people excited about what could be.", "I hate feeling boxed in or tied down.",
+      "I'm quick to start new projects.", "I have more ideas than I finish.",
+      "I can find the bright side of almost anything.", "I keep my calendar full so I don't miss out."],
+  8: ["I take charge when no one else will.", "I have a hard time letting people see me vulnerable.",
+      "I fiercely protect the people I love.", "People sometimes find me intimidating.",
+      "I say what everyone else is thinking.", "I push back hard when someone tries to control me.",
+      "I make decisions quickly.", "I can come on too strong.",
+      "I stand up for people who can't stand up for themselves.", "People have to earn my trust."],
+  9: ["I can usually see every side of a disagreement.", "I go along with others to avoid conflict.",
+      "People tell me they feel calm around me.", "I sometimes lose track of what I actually want.",
+      "I help people understand each other.", "I put off things that feel uncomfortable.",
+      "I'm easygoing and adapt to others' plans.", "I zone out in routines or screens when life feels heavy.",
+      "I accept people as they are.", "It's hard for me to know my own opinion."],
+};
+// Positive lines for the final round: "What lights you up more?"
+const CORE = {
+  // Every line names the type's gift at its best, so no option sounds more noble than another.
+  1: ["Making something better than it was.", "Seeing something done with excellence and integrity.", "Standing for what's right."],
+  2: ["Making a real difference in someone's life.", "Being there for someone when they need it most.", "Bringing care and warmth to the people around me."],
+  3: ["Seeing a team succeed because of what we built.", "Reaching a goal that seemed out of reach.", "Inspiring people to bring their best."],
+  4: ["Creating something honest and beautiful.", "A conversation where someone feels truly understood.", "Helping people find meaning in what they're going through."],
+  5: ["Finally understanding something complex.", "Solving a problem no one else could figure out.", "Giving someone a clear, wise answer."],
+  6: ["Being part of a team that has each other's backs.", "Helping my people be ready for what's ahead.", "Staying faithful when others give up."],
+  7: ["Seeing a better future and getting people excited about it.", "Finding a way forward when everyone else is stuck.", "Bringing hope and joy into a room."],
+  8: ["Taking on a big challenge and making it happen.", "Standing up for someone who can't stand up for themselves.", "Leading people through something hard."],
+  9: ["Helping people who disagree find common ground.", "Bringing calm to a tense situation.", "Making everyone feel included and at ease."],
+};
+// Tiebreakers for commonly confused pairs, asked only when both reach the final round.
+const TIE = {
+  "1-7": [[1, "When plans fall apart, my first thought is what should have been done differently."], [7, "When plans fall apart, my first thought is what else we could try."],
+          [1, "I'd rather do one thing right than many things fast."], [7, "I'd rather try many things than perfect one."]],
+  "3-7": [[3, "I'd rather finish strong than start something new."], [7, "Starting something new energizes me more than finishing."],
+          [3, "I stay with a project until it's a clear success."], [7, "Once I've figured something out, I'm ready to move on."]],
+  "7-8": [[7, "I'd rather keep things light than have a confrontation."], [8, "I don't mind a confrontation if it gets things done."],
+          [7, "I win people over with enthusiasm."], [8, "I win people over with conviction and strength."]],
+  "6-7": [[6, "Before I commit, I think through what could go wrong."], [7, "I commit first and figure out the details later."],
+          [6, "I feel best with a plan and people I trust."], [7, "I feel best when I have lots of options."]],
+  "2-7": [[2, "I feel best when someone needs me."], [7, "I feel best when I'm free to follow my own ideas."],
+          [2, "I tend to fit my plans around other people's."], [7, "I tend to invite people into my plans."]],
+  "5-7": [[5, "I'd rather go deep into one subject."], [7, "I'd rather explore lots of interests."],
+          [5, "Too much going on drains me."], [7, "Lots going on energizes me."]],
+  "2-9": [[2, "I move toward people to help them."], [9, "I go along with people so things stay peaceful."],
+          [2, "It stings when no one thanks me."], [9, "I don't need thanks; I just want things calm."]],
+  "1-6": [[1, "I trust my own sense of right and wrong."], [6, "I look to people or guidelines I trust before deciding."],
+          [1, "I'm usually confident about the right way to do something."], [6, "I often doubt whether I'm doing it right."]],
+  "3-8": [[3, "I adjust my style to win people over."], [8, "I am who I am, whether people like it or not."],
+          [3, "I want people to admire what I've done."], [8, "I want people to respect my strength."]],
+  "4-5": [[4, "I work through life by feeling it."], [5, "I work through life by thinking it through."],
+          [4, "I want to express what I feel."], [5, "I'd rather understand a feeling than express it."]],
+  "6-9": [[6, "In a crisis, my mind runs through what could happen."], [9, "In a crisis, I stay calm, maybe too calm."],
+          [6, "I stay alert to problems."], [9, "I tune out problems I can't fix."]],
+  "1-3": [[1, "Doing it right matters more than how it looks."], [3, "How it comes across matters a lot."],
+          [1, "I'd rather be correct than impressive."], [3, "I'd rather be impressive than perfect."]],
+  "2-4": [[2, "I focus on what other people are feeling."], [4, "I focus on what I'm feeling."],
+          [2, "I'm happiest when I'm giving."], [4, "I'm happiest when I'm understood."]],
+  "5-9": [[5, "I pull back to think and recharge."], [9, "I pull back to avoid conflict."],
+          [5, "I guard my energy so I don't get drained."], [9, "I keep quiet so things stay peaceful."]],
+  "6-8": [[6, "I push back when something doesn't feel safe."], [8, "I push back when someone tries to control me."],
+          [6, "I respect authority I can trust."], [8, "I'd rather be the authority."]],
+  "2-3": [[2, "I want to be loved for how I care."], [3, "I want to be valued for what I achieve."],
+          [2, "I'm glad to help behind the scenes."], [3, "I like being out front."]],
+};
+// Wing statements: the flavor each neighboring type adds. Rated on their own, never forced.
+const WING = {
+  1: ["I hold myself to high standards.", "I like things orderly and done properly.", "I notice what's off and want to fix it."],
+  2: ["I lead with warmth and care for people.", "I put a lot of energy into my relationships.", "I go out of my way to help."],
+  3: ["I'm driven to get results.", "I care about doing things with polish.", "I like being recognized for good work."],
+  4: ["I want what I do to feel personal and meaningful.", "I'm very in touch with my emotions.", "I like to be original."],
+  5: ["I like to think things through deeply.", "I need time on my own to process.", "I value knowledge and expertise."],
+  6: ["When I start something new, I want my people with me.", "I keep a plan B in my back pocket.", "Loyalty matters a lot to me."],
+  7: ["I bring energy and fun to what I do.", "I like keeping my options open.", "I'm optimistic about what's next."],
+  8: ["When I start something new, I want to be the one driving it.", "If plan A doesn't work, I push harder.", "I'm direct, even blunt."],
+  9: ["I go with the flow.", "I try to keep things calm and avoid friction.", "I'm patient and easygoing."],
+};
+// What each neighboring type adds to a main type. Keyed "main-wing".
+const WINGTEXT = {
+  "1-9": { adds: "Your 9 side makes you calmer, more patient, and a bit more reserved. You hold high ideals, but you'd rather model them quietly than push them on people.", gift: "Calm, principled wisdom that people trust.", watch: "Judging quietly instead of saying what bothers you, then pulling away.", use: "You need to stay steady and fair in a tense situation." },
+  "1-2": { adds: "Your 2 side makes you warmer and more people-focused. You don't just want things right; you want to help people do right and do well.", gift: "Advocating for others and improving their lives.", watch: "Becoming controlling or preachy “for their own good.”", use: "Someone needs both a high standard and a helping hand." },
+  "2-1": { adds: "Your 1 side makes your care more principled and service-minded. You help because it's the right thing to do.", gift: "Faithful, dependable care that follows through.", watch: "Feeling resentful or self-righteous when your help isn't matched.", use: "A need calls for steady, behind-the-scenes service." },
+  "2-3": { adds: "Your 3 side makes you more outgoing, charming, and ambitious. You connect people and make things happen for them.", gift: "Energizing people and opening doors for them.", watch: "Helping in ways that get you noticed or liked.", use: "A group needs warmth and someone to rally them." },
+  "3-2": { adds: "Your 2 side makes you warmer and more relational. You like to succeed in a way that lifts others too.", gift: "Charisma that makes people feel valued while you lead.", watch: "Shaping yourself into whatever people want you to be.", use: "Leading a team where people need encouragement." },
+  "3-4": { adds: "Your 4 side makes you more introspective and creative. You want your work to be excellent and meaningful.", gift: "Excellence with depth and originality.", watch: "Moodiness and comparing yourself to others' success.", use: "The work needs both quality and a personal touch." },
+  "4-3": { adds: "Your 3 side makes you more expressive, ambitious, and polished. You want to share what you create with the world.", gift: "Turning deep feeling into something others can see and use.", watch: "Performing your feelings, or envying others' success.", use: "It's time to put your creativity out there." },
+  "4-5": { adds: "Your 5 side makes you more private, thoughtful, and unconventional. You go deep inside before you share.", gift: "Original insight with real depth.", watch: "Withdrawing into your own world for too long.", use: "Something needs careful, original thinking." },
+  "5-4": { adds: "Your 4 side makes you more creative and in touch with feeling. Your ideas carry imagination, not just analysis.", gift: "Original, imaginative insight.", watch: "Retreating into your inner world instead of engaging.", use: "A problem needs a fresh, creative angle." },
+  "5-6": { adds: "Your 6 side makes you more practical, loyal, and team-oriented. You use what you know to protect and help your people.", gift: "Thorough problem-solving others can rely on.", watch: "Overanalyzing, or growing suspicious of people.", use: "Your team needs a careful plan." },
+  "6-5": { adds: "Your 5 side makes you more independent, analytical, and reserved. You think things through on your own before you trust them.", gift: "Careful, thorough protection of the people you love.", watch: "Becoming cynical or closed off.", use: "A situation needs sober, careful judgment." },
+  "6-7": { adds: "Your 7 side makes you more playful, social, and upbeat. Humor and fun help you handle worry.", gift: "Warmth and humor that build trust.", watch: "Staying busy to avoid feeling anxious.", use: "People need encouragement and a lighter mood." },
+  "7-6": { adds: "Your 6 side makes you more loyal, relational, and responsible. You want to dream with people, not just for yourself, and you bring others along.", gift: "Turning big ideas into something your people can share in.", watch: "Overcommitting to keep everyone happy, and anxiety hiding under the fun.", use: "Home, friendships, and teams, when people need to feel included in the vision." },
+  "7-8": { adds: "Your 8 side makes you more assertive, driven, and enterprising. You don't just dream up ideas; you push to make them real.", gift: "Turning vision into reality. Getting things built.", watch: "Impatience, steamrolling people, and taking on too much at once.", use: "Starting something, making a hard call, or leading through resistance." },
+  "8-7": { adds: "Your 7 side makes you more energetic, adventurous, and entrepreneurial. Your strength comes with enthusiasm.", gift: "Bold leadership that people want to follow.", watch: "Impulsiveness and overpowering others.", use: "Something needs momentum and courage." },
+  "8-9": { adds: "Your 9 side makes you calmer and steadier. Your strength is quiet and protective.", gift: "Steady, quiet strength others lean on.", watch: "Stubbornness, and being hard to move once you've decided.", use: "People need a calm, strong presence." },
+  "9-8": { adds: "Your 8 side gives you more backbone and directness. You keep the peace, but you'll stand your ground.", gift: "Peace with strength behind it.", watch: "Holding things in until anger comes out all at once.", use: "Peace needs someone to speak up." },
+  "9-1": { adds: "Your 1 side makes you more principled, orderly, and idealistic. You care about doing the right thing calmly.", gift: "A calm conscience that helps others see what's right.", watch: "Quiet judgment, and getting rigid about how things should go.", use: "A situation needs fairness and calm order." },
+};
+// People in Scripture whose stories show each pattern. We can't know anyone's
+// type for certain, including people in the Bible; these are patterns we can see.
+const BIBLE = {
+  1: { who: "Paul", strengths: "Zeal, conviction, and discipline. He gave everything for what he believed was true.", refsS: "Philippians 3:4–6; 2 Timothy 4:7",
+       struggles: "Before he met Jesus, his zeal turned harsh. He persecuted the church, sure he was right. Later he had a sharp falling-out with Barnabas.", refsW: "Galatians 1:13–14; Acts 15:39",
+       used: "God turned his zeal into grace-filled mission. He carried the gospel across the Roman world and wrote much of the New Testament. “By the grace of God I am what I am.”", refsU: "1 Corinthians 15:10" },
+  2: { who: "Martha", strengths: "Warm hospitality and practical love. She opened her home to Jesus.", refsS: "Luke 10:38",
+       struggles: "Worried and distracted by serving, and resentful when no one helped: “Lord, do you not care?”", refsW: "Luke 10:40–41",
+       used: "Jesus gently invited her to the one thing that matters. Later she made one of the clearest confessions of faith in the Gospels: “I believe that you are the Christ.”", refsU: "Luke 10:42; John 11:27" },
+  3: { who: "Jacob", strengths: "Determined, resourceful, and persistent. He built a family and a fortune.", refsS: "Genesis 30–31",
+       struggles: "He grasped for the blessing by deceiving his father, striving to get what he thought he had to earn.", refsW: "Genesis 27",
+       used: "God met him at Bethel, wrestled with him through the night, and gave him a new name, Israel. He received a blessing he couldn't earn.", refsU: "Genesis 28:10–15; 32:24–30" },
+  4: { who: "Jeremiah", strengths: "Deep feeling, honesty, and a poet's voice. He stayed faithful to a painful calling.", refsS: "Jeremiah 1",
+       struggles: "Lament that slid into despair. He felt alone and even cursed the day he was born.", refsW: "Jeremiah 20:14–18",
+       used: "God told him, “Before I formed you in the womb I knew you.” Through him God spoke hope in a dark time: the promise of a new covenant written on the heart.", refsU: "Jeremiah 1:5; 31:31–34" },
+  5: { who: "Thomas", strengths: "Honest questions, a need to understand, and quiet courage: “Let us also go, that we may die with him.”", refsS: "John 11:16",
+       struggles: "He held back from believing until he could see for himself, and he wasn't with the others when Jesus first appeared.", refsW: "John 20:24–25",
+       used: "Jesus met him with exactly what he needed. Thomas answered with one of the boldest confessions in Scripture: “My Lord and my God!”", refsU: "John 20:26–28" },
+  6: { who: "Gideon", strengths: "Careful, loyal, and fully committed once he trusted the call.", refsS: "Judges 7",
+       struggles: "Fear and doubt. He was hiding when God found him, and he asked for sign after sign.", refsW: "Judges 6:11, 36–40",
+       used: "God called him a “mighty man of valor” before he was one, then led him and just 300 men to victory.", refsU: "Judges 6:12; 7:7" },
+  7: { who: "Peter", strengths: "Enthusiastic and bold. First to speak, first out of the boat, and the first to say, “You are the Christ.”", refsS: "Matthew 14:28–29; 16:16",
+       struggles: "Impulsive, and quick to avoid pain. He rebuked Jesus for talking about the cross, then denied him under pressure.", refsW: "Matthew 16:22; Luke 22:54–62",
+       used: "Jesus restored him over breakfast by the sea. At Pentecost, Peter preached and about 3,000 people came to faith.", refsU: "John 21:15–19; Acts 2" },
+  8: { who: "Moses", strengths: "A fierce protector. He defended the oppressed, stood up to Pharaoh, and led a nation.", refsS: "Exodus 2:11–17",
+       struggles: "Anger. He killed an Egyptian, shattered the stone tablets, and struck the rock when God told him to speak to it.", refsW: "Exodus 2:12; 32:19; Numbers 20:11–12",
+       used: "His strength was shaped into humility. Scripture calls him very meek, and God spoke with him face to face, as with a friend.", refsU: "Numbers 12:3; Exodus 33:11" },
+  9: { who: "Abraham", strengths: "A peacemaker. He let Lot choose the best land to avoid a quarrel, and welcomed strangers generously.", refsS: "Genesis 13:8–9; 18:1–8",
+       struggles: "Going along to avoid conflict. Twice he passed his wife off as his sister rather than face a powerful king.", refsW: "Genesis 12:10–20; 20",
+       used: "God called him to get up and go. He believed God, and it was counted to him as righteousness. He became the father of faith.", refsU: "Genesis 12:1–3; 15:6" },
+};
+
+// A four-week cycle for each type: who you are in Christ, a memory verse, and
+// a breath prayer. Verses are King James (public domain) for this prototype.
+const WEEKS = {
+  1: [
+    { id: "You are made right by grace, not by getting everything right.", ref: "Ephesians 2:8", verse: "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God.", inhale: "Your grace is enough", exhale: "I don't have to be perfect" },
+    { id: "You are free from condemnation.", ref: "Romans 8:1", verse: "There is therefore now no condemnation to them which are in Christ Jesus.", inhale: "No condemnation", exhale: "only your love" },
+    { id: "You can rest. The work is His.", ref: "Matthew 11:28", verse: "Come unto me, all ye that labour and are heavy laden, and I will give you rest.", inhale: "Jesus, I come", exhale: "I receive your rest" },
+    { id: "His mercy meets you new every morning.", ref: "Lamentations 3:22–23", verse: "It is of the LORD's mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.", inhale: "New mercy", exhale: "for today" },
+  ],
+  2: [
+    { id: "You are loved before you give anything.", ref: "1 John 4:19", verse: "We love him, because he first loved us.", inhale: "You loved me first", exhale: "I can rest in that" },
+    { id: "Your needs matter to God.", ref: "Philippians 4:19", verse: "But my God shall supply all your need according to his riches in glory by Christ Jesus.", inhale: "You see my needs", exhale: "I can name them" },
+    { id: "You are His friend, not only His servant.", ref: "John 15:15", verse: "Henceforth I call you not servants; for the servant knoweth not what his lord doeth: but I have called you friends.", inhale: "You call me friend", exhale: "not just helper" },
+    { id: "You can sit at His feet, not just serve.", ref: "Luke 10:42", verse: "But one thing is needful: and Mary hath chosen that good part, which shall not be taken away from her.", inhale: "One thing is needed", exhale: "I sit with you" },
+  ],
+  3: [
+    { id: "God delights in you, not in what you produce.", ref: "Zephaniah 3:17", verse: "The LORD thy God in the midst of thee is mighty; he will save, he will rejoice over thee with joy; he will rest in his love, he will joy over thee with singing.", inhale: "You delight in me", exhale: "not in what I do" },
+    { id: "You are His workmanship, not your own project.", ref: "Ephesians 2:10", verse: "For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them.", inhale: "I am your workmanship", exhale: "not my own project" },
+    { id: "You are allowed to be still.", ref: "Psalm 46:10", verse: "Be still, and know that I am God.", inhale: "Be still", exhale: "and know" },
+    { id: "His approval is the one that counts.", ref: "Galatians 1:10", verse: "For do I now persuade men, or God? or do I seek to please men? for if I yet pleased men, I should not be the servant of Christ.", inhale: "Your approval", exhale: "is enough" },
+  ],
+  4: [
+    { id: "You were known before you were formed.", ref: "Jeremiah 1:5", verse: "Before I formed thee in the belly I knew thee.", inhale: "You know me", exhale: "fully" },
+    { id: "You are wonderfully made, with nothing essential missing.", ref: "Psalm 139:14", verse: "I will praise thee; for I am fearfully and wonderfully made: marvellous are thy works; and that my soul knoweth right well.", inhale: "Wonderfully made", exhale: "nothing missing" },
+    { id: "You are a new creation.", ref: "2 Corinthians 5:17", verse: "Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new.", inhale: "Made new", exhale: "in you" },
+    { id: "God is near when you're hurting.", ref: "Psalm 34:18", verse: "The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.", inhale: "You are near", exhale: "in this ache" },
+  ],
+  5: [
+    { id: "God's grace gives you enough.", ref: "2 Corinthians 9:8", verse: "And God is able to make all grace abound toward you; that ye, always having all sufficiency in all things, may abound to every good work.", inhale: "Your grace", exhale: "is enough for me" },
+    { id: "Wisdom is His gift to you.", ref: "James 1:5", verse: "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him.", inhale: "Give me wisdom", exhale: "and courage to act" },
+    { id: "You don't have to figure it all out.", ref: "Proverbs 3:5", verse: "Trust in the LORD with all thine heart; and lean not unto thine own understanding.", inhale: "I trust you", exhale: "beyond what I understand" },
+    { id: "Christ gives you strength to engage.", ref: "Philippians 4:13", verse: "I can do all things through Christ which strengtheneth me.", inhale: "Your strength", exhale: "to show up" },
+  ],
+  6: [
+    { id: "God will never leave you.", ref: "Deuteronomy 31:8", verse: "And the LORD, he it is that doth go before thee; he will be with thee, he will not fail thee, neither forsake thee: fear not, neither be dismayed.", inhale: "You go before me", exhale: "I will not fear" },
+    { id: "You can be strong and courageous.", ref: "Joshua 1:9", verse: "Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.", inhale: "You are with me", exhale: "wherever I go" },
+    { id: "His peace guards your mind.", ref: "Isaiah 26:3", verse: "Thou wilt keep him in perfect peace, whose mind is stayed on thee: because he trusteth in thee.", inhale: "Perfect peace", exhale: "my mind on you" },
+    { id: "You can trust Him when you're afraid.", ref: "Psalm 56:3", verse: "What time I am afraid, I will trust in thee.", inhale: "When I'm afraid", exhale: "I trust you" },
+  ],
+  7: [
+    { id: "Your joy is secure in Him.", ref: "Psalm 16:11", verse: "Thou wilt shew me the path of life: in thy presence is fulness of joy; at thy right hand there are pleasures for evermore.", inhale: "In your presence", exhale: "is fullness of joy" },
+    { id: "You can be content in this moment.", ref: "Philippians 4:11", verse: "Not that I speak in respect of want: for I have learned, in whatsoever state I am, therewith to be content.", inhale: "Right here", exhale: "you are enough" },
+    { id: "He is with you in the hard things too.", ref: "Isaiah 43:2", verse: "When thou passest through the waters, I will be with thee; and through the rivers, they shall not overflow thee.", inhale: "Through the waters", exhale: "you are with me" },
+    { id: "Your vision is a gift, and He directs your steps.", ref: "Proverbs 16:9", verse: "A man's heart deviseth his way: but the LORD directeth his steps.", inhale: "I dream", exhale: "you direct my steps" },
+  ],
+  8: [
+    { id: "His strength shows up in your weakness.", ref: "2 Corinthians 12:9", verse: "My grace is sufficient for thee: for my strength is made perfect in weakness.", inhale: "Your strength", exhale: "in my weakness" },
+    { id: "You are safe to be gentle.", ref: "Matthew 11:29", verse: "Take my yoke upon you, and learn of me; for I am meek and lowly in heart: and ye shall find rest unto your souls.", inhale: "Gentle and humble", exhale: "like you" },
+    { id: "You don't have to fight every battle alone.", ref: "Exodus 14:14", verse: "The LORD shall fight for you, and ye shall hold your peace.", inhale: "You fight for me", exhale: "I can be still" },
+    { id: "Your strength is meant to protect.", ref: "Psalm 82:3", verse: "Defend the poor and fatherless: do justice to the afflicted and needy.", inhale: "Use my strength", exhale: "for the weak" },
+  ],
+  9: [
+    { id: "You are called by name. You matter.", ref: "Isaiah 43:1", verse: "Fear not: for I have redeemed thee, I have called thee by thy name; thou art mine.", inhale: "Called by name", exhale: "I am yours" },
+    { id: "Peacemakers are His children.", ref: "Matthew 5:9", verse: "Blessed are the peacemakers: for they shall be called the children of God.", inhale: "Make me a peacemaker", exhale: "not just a peacekeeper" },
+    { id: "You can rise and act.", ref: "Isaiah 60:1", verse: "Arise, shine; for thy light is come, and the glory of the LORD is risen upon thee.", inhale: "Arise", exhale: "and shine" },
+    { id: "Your voice is part of His plan.", ref: "Esther 4:14", verse: "And who knoweth whether thou art come to the kingdom for such a time as this?", inhale: "For such a time", exhale: "as this" },
+  ],
+};
+// Weeks since a fixed Monday, so everyone of a type is on the same week.
+// Translation picker. Only KJV text ships with the page (public domain); other
+// translations open on Bible Gateway until Yada licenses them.
+const VERSIONS = [["NIV", "New International Version"], ["NLT", "New Living Translation"], ["AMP", "Amplified Bible"], ["ESV", "English Standard Version"], ["CSB", "Christian Standard Bible"], ["NKJV", "New King James Version"], ["KJV", "King James Version"]];
+const bgLink = (ref, v) => `https://www.biblegateway.com/passage/?search=${encodeURIComponent(ref.replace(/\u2013/g, "-"))}&version=${v}`;
+const weekIndex = () => Math.floor((Date.now() - Date.UTC(2026, 0, 5)) / (7 * 864e5)) % 4;
+
+const FLAVOR = { 1: "principled and orderly", 2: "warm and relational", 3: "driven and polished", 4: "personal and expressive", 5: "thoughtful and independent", 6: "loyal and team-minded", 7: "energetic and optimistic", 8: "bold and direct", 9: "easygoing and steady" };
+
+const T = {
+  1: { name: "The Reformer", gift: "Integrity. Making things better.", struggle: "An inner voice that is rarely satisfied.", heart: "Learning that grace, not getting it right, is what makes you good enough.", verse: "Matthew 11:28–30" },
+  2: { name: "The Helper", gift: "Generosity. Warmth that notices.", struggle: "Saying what you need, and giving without keeping track.", heart: "Learning to receive love you didn't earn, and to name your own needs.", verse: "1 John 4:19" },
+  3: { name: "The Achiever", gift: "Excellence. Inspiring others to rise.", struggle: "Knowing who you are apart from what you do.", heart: "Learning you are loved before you do anything.", verse: "Matthew 3:17" },
+  4: { name: "The Individualist", gift: "Depth. Seeing beauty and meaning.", struggle: "Feeling that something essential is missing.", heart: "Learning that you are already known and not missing anything essential.", verse: "Psalm 139:13–14" },
+  5: { name: "The Investigator", gift: "Insight. Clear thinking under pressure.", struggle: "Pulling back when people need you present.", heart: "Learning that God supplies enough, so you can engage instead of withdraw.", verse: "Philippians 4:19" },
+  6: { name: "The Loyalist", gift: "Faithfulness. Someone others can count on.", struggle: "Worry that runs ahead of you.", heart: "Learning to rest in the One who doesn't leave.", verse: "Deuteronomy 31:8" },
+  7: { name: "The Enthusiast", gift: "Vision. Seeing what could be.", struggle: "Staying with something hard or ordinary once the excitement fades.", heart: "Learning that joy can be found inside hard things, not only outside them.", verse: "Philippians 4:11–13" },
+  8: { name: "The Challenger", gift: "Strength. Protecting and leading.", struggle: "Letting people see you vulnerable.", heart: "Learning that real strength can be gentle and can trust.", verse: "2 Corinthians 12:9" },
+  9: { name: "The Peacemaker", gift: "Peace. Helping people understand each other.", struggle: "Losing track of what you want.", heart: "Learning your presence and voice matter, and that peace sometimes means engaging.", verse: "Matthew 5:9" },
+};
+const SCALE = ["Never", "Rarely", "Sometimes", "Often", "Almost always"];
+const ARROWS = { 1: [4, 7], 2: [8, 4], 3: [9, 6], 4: [2, 1], 5: [7, 8], 6: [3, 9], 7: [1, 5], 8: [5, 2], 9: [6, 3] };
+const WINGS = (t) => [t === 1 ? 9 : t - 1, t === 9 ? 1 : t + 1];
+const TYPES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const hash = (s) => { let x = 2166136261; for (const c of String(s)) x = Math.imul(x ^ c.charCodeAt(0), 16777619); return x >>> 0; };
+const ROTATION = [...TYPES].sort((a, b) => hash("r" + a) - hash("r" + b));
+// Round 1: the first two statements of every type, mixed together.
+const ROUND1 = [0, 1].flatMap((k) => ROTATION.map((t) => `${t}.${k}`)).sort((a, b) => hash("o" + a) - hash("o" + b));
+
+// Tuning: who stays in the running.
+const KEEP_AFTER_ROUND1 = 4;   // at least this many types go on to round 2
+const ROUND2_MAX = 6;          // statements per type in round 2
+const CLOSE_MAX = 8;           // the top two get up to this many when they're within CLOSE_GAP
+const CLOSE_GAP = 0.3;
+const TIE_GAP = 0.75;          // ask a pair's tiebreakers only when they're this close
+const DROP_GAP = 1.0;          // set a type aside when its average trails the leader by this much
+const CLEAR_GAP = 1.5;         // skip the final round when the leader is this far ahead
+const DUEL_WEIGHT = 0.1;       // each head-to-head win or loss moves a finalist this much on the 0-4 scale
+const DUEL_CAP = 0.3;          // the final round can move a finalist at most this much either way
+
+const KEY = "yada-type-finder-v6";
+let st = load() || fresh();
+function fresh() { return { translation: "NIV", step: "intro", mode: "self", about: "", guess: "", sure: "", ans: {}, duel: {}, history: [], otherCode: "", tname: "", feel: "", note: "" }; }
+function load() { try { const o = JSON.parse(localStorage.getItem(KEY)); return o && o.history ? o : null; } catch { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} }
+function set(patch) { Object.assign(st, patch); save(); render(); }
+
+function stats(ans) {
+  const r = {}; TYPES.forEach((t) => r[t] = { sum: 0, n: 0, good: [0, 0], hard: [0, 0] });
+  for (const [key, v] of Object.entries(ans)) {
+    if (key.startsWith("w:")) continue;
+    if (key.startsWith("x:")) { const [, pair, i] = key.split(":"); const x = r[TIE[pair][i][0]]; x.sum += v; x.n++; continue; }
+    const [t, k] = key.split(".").map(Number); const x = r[t]; x.sum += v; x.n++;
+    const side = k % 2 === 0 ? x.good : x.hard; side[0] += v; side[1]++;
+  }
+  TYPES.forEach((t) => r[t].avg = r[t].n ? r[t].sum / r[t].n : 0);
+  return r;
+}
+const byAvg = (r) => (a, b) => r[b].avg - r[a].avg || r[b].n - r[a].n || a - b;
+
+// Works out what to ask next from the answers so far. Recomputed every time,
+// so going back and changing an answer can bring a type back into the running.
+function plan(s) {
+  const r = stats(s.ans);
+  const q1 = ROUND1.find((key) => !(key in s.ans));
+  if (q1) return { kind: "s", key: q1, round: 1, alive: TYPES };
+  const sorted = [...TYPES].sort(byAvg(r));
+  const cutoff = r[sorted[KEEP_AFTER_ROUND1 - 1]].avg - 0.25;
+  let alive = sorted.filter((t, i) => i < KEEP_AFTER_ROUND1 || (r[t].avg >= cutoff && i < 5));
+  const out1 = TYPES.filter((t) => !alive.includes(t));
+  const leader = () => Math.max(...alive.map((t) => r[t].avg));
+  const prune = () => { if (alive.every((t) => r[t].n >= 4)) { const lead = leader(); const keep = alive.filter((t) => r[t].avg >= lead - DROP_GAP); alive = keep.length >= 2 ? keep : [...alive].sort(byAvg(r)).slice(0, 2); } };
+  prune();
+  const rk = [...alive].sort(byAvg(r)), base = (t) => Object.keys(s.ans).filter((k) => k.startsWith(t + ".")).length;
+  const settled = alive.every((t) => base(t) >= 4) && r[rk[0]].avg - r[rk[1]].avg >= CLEAR_GAP;   // stop early when clear
+  const close = r[rk[0]].avg - r[rk[1]].avg <= CLOSE_GAP;
+  const cap = (t) => close && rk.slice(0, 2).includes(t) ? CLOSE_MAX : ROUND2_MAX;
+  const need = settled ? [] : alive.filter((t) => base(t) < cap(t)).sort((a, b) => base(a) - base(b) || ROTATION.indexOf(a) - ROTATION.indexOf(b));
+  if (need.length && (alive.length > 2 || close) || need.some((t) => base(t) < 4)) {
+    const t = need[0]; return { kind: "s", key: `${t}.${base(t)}`, round: 2, alive, out1 };
+  }
+  const ranked2 = [...alive].sort(byAvg(r));
+  let finalists = ranked2.slice(0, 3).filter((t) => r[t].avg >= r[ranked2[0]].avg - 1.25);
+  if (finalists.length < 2) finalists = ranked2.slice(0, 2);
+  if (r[finalists[0]].avg - r[finalists[1]].avg >= CLEAR_GAP) finalists = [finalists[0]];
+  for (let i = 0; i < finalists.length; i++) for (let j = i + 1; j < finalists.length; j++) {
+    // Only for pairs involving the leader that are still close.
+    if (i !== 0 || Math.abs(r[finalists[0]].avg - r[finalists[j]].avg) > TIE_GAP) continue;
+    const pair = [finalists[i], finalists[j]].sort((x, y) => x - y).join("-"), list = TIE[pair] || [];
+    const k = list.findIndex((_, n) => !(`x:${pair}:${n}` in s.ans));
+    if (k >= 0) return { kind: "s", key: `x:${pair}:${k}`, round: 3, alive, out1, finalists };
+  }
+  for (let i = 0; i < finalists.length; i++) for (let j = i + 1; j < finalists.length; j++) {
+    const [a, b] = [finalists[i], finalists[j]].sort((x, y) => x - y), key = `${a}-${b}`, res = s.duel[key] || [];
+    const winsA = res.filter((x) => x === "a").length, winsB = res.filter((x) => x === "b").length;
+    if (res.length < 3 && winsA < 2 && winsB < 2) return { kind: "d", key, a, b, k: res.length, round: 3, alive, out1, finalists };
+  }
+  const first = rankFinal(s, r, finalists)[0];
+  const avgs = TYPES.map((t) => r[t].avg);
+  if (Math.max(...avgs) - Math.min(...avgs) >= 1) {
+    for (let k = 0; k < 3; k++) for (const w of WINGS(first)) if (!(`w:${w}:${k}` in s.ans)) return { kind: "s", key: `w:${w}:${k}`, round: 4, alive, out1, finalists, first };
+  }
+  return { kind: "done", alive, out1, finalists, r };
+}
+
+// The final round adjusts the statement averages; it never replaces them.
+// A finalist can only overtake another if they were already close.
+function duelTally(s) {
+  const wins = {}, losses = {}; TYPES.forEach((t) => { wins[t] = 0; losses[t] = 0; });
+  for (const [key, res] of Object.entries(s.duel)) { const [a, b] = key.split("-").map(Number);
+    res.forEach((x) => { if (x === "a") { wins[a]++; losses[b]++; } if (x === "b") { wins[b]++; losses[a]++; } }); }
+  return { wins, losses };
+}
+function rankFinal(s, r, finalists) {
+  const { wins, losses } = duelTally(s), final = {};
+  TYPES.forEach((t) => final[t] = r[t].avg + Math.max(-DUEL_CAP, Math.min(DUEL_CAP, DUEL_WEIGHT * (wins[t] - losses[t]))));
+  return [...finalists].sort((a, b) => final[b] - final[a] || r[b].avg - r[a].avg || a - b);
+}
+
+function outcome(s) {
+  const p = plan(s), r = stats(s.ans), { wins, losses } = duelTally(s);
+  const fin = rankFinal(s, r, p.finalists), rest = TYPES.filter((t) => !fin.includes(t)).sort(byAvg(r));
+  return { order: [...fin, ...rest], r, wins, losses, p };
+}
+function wingRead(s, first) {
+  const [a, b] = WINGS(first), avg = (w) => { const v = [0, 1, 2].map((k) => s.ans[`w:${w}:${k}`]).filter((x) => x !== undefined); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; };
+  const va = avg(a), vb = avg(b); if (va === null || vb === null) return null;
+  const hi = va >= vb ? a : b, lo = hi === a ? b : a, d = Math.abs(va - vb), top = Math.max(va, vb);
+  const kind = top < 1.5 ? "none" : d < 0.5 ? "both" : "more";
+  return { kind, hi, lo, va, vb, a, b };
+}
+const encode = (s) => "Y5-" + outcome(s).order.slice(0, 3).join("");
+const decodeTop = (code) => { const m = /^Y5-([1-9]{3})$/.exec(code.trim()); return m ? m[1].split("").map(Number) : null; };
+
+const an = (n) => (n === 8 ? "an " : "a ") + n;
+const h = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const other = () => st.mode === "other";
+const who = () => other() ? (st.about.trim() || "them") : "you";
+
+function render() {
+  const head = `<header><div class="mark" aria-hidden="true">י</div><div class="brand">Yada<small>Type finder · draft for testing</small></div></header>`;
+  let body;
+  if (location.hash === "#results") body = inboxView();
+  else if (location.hash === "#about") body = aboutView();
+  else if (location.hash === "#bible") body = bibleView();
+  else if (st.step === "read") body = aboutView(true);
+  else if (st.step === "quiz") { const p = plan(st); body = p.kind === "done" ? result() : p.kind === "d" ? duel(p) : statement(p); }
+  else body = intro();
+  document.getElementById("app").innerHTML = head + (location.hash === "#results" || location.hash === "#about" || location.hash === "#bible" ? "" : (st.step === "intro" || (st.step === "quiz" && plan(st).kind === "done")) ? ownerBar() : "") + body;
+  wire();
+}
+
+// Organizer tools, shown only to the artifact's owner.
+const SHARE_URL = "https://useforesight2020.github.io/yada/";
+const INVITE = `Hey! I'm building an app called Yada and would love your help testing one piece of it. It's a short Enneagram test (about 10 minutes): ${SHARE_URL}
+
+At the end, there's a box that says "Helping test this?" Fill it in, tap "Copy my results," and text me what it copies. Honest feedback helps the most, especially if the result feels wrong!`;
+let isOwner = false;
+(async () => {
+  try { const u = await window.claude?.use?.("user"); if (u && await u.isOwner()) { isOwner = true; render(); } } catch {}
+})();
+function ownerBar() {
+  if (!isOwner) return "";
+  return `<div class="panel" style="border-color:var(--brand)">
+    <span class="eyebrow">Only you see this \u00b7 organizer tools</span>
+    <div class="row">
+      <button type="button" id="copyinvite">Copy invite message</button>
+      <button type="button" class="secondary" id="seeresults">See tester results</button>
+    </div>
+    <span class="muted small" id="invitecopied" role="status"></span>
+    <p class="muted small">The invite includes the link. People can open it only after you turn on the public link in this page's Share menu.</p>
+  </div>`;
+}
+
+function intro() {
+  const started = st.history.length > 0;
+  return `
+  <section class="stack">
+    <h1>${other() ? `Discover what drives ${h(who())}` : "Discover what drives you"}</h1>
+    <p class="muted">This finder suggests ${other() ? "their" : "your"} likely Enneagram type: the core motives, gifts, and blind spots behind how ${other() ? "they" : "you"} think and react. It takes about 10 minutes, starting with a short read on what the Enneagram is and isn't.</p>
+  </section>
+  <div class="panel">
+    <span class="eyebrow">How it works</span>
+    <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
+      <li>You'll see short statements one at a time, like \u201cI'm usually the one with the big idea.\u201d</li>
+      <li>Tap how often each one is true of ${other() ? "them" : "you"}: <strong>Never</strong>, <strong>Rarely</strong>, <strong>Sometimes</strong>, <strong>Often</strong>, or <strong>Almost always</strong>. Go with ${other() ? "your" : "your"} first instinct.</li>
+      <li>As you answer, types that don't fit get set aside. At the end, the last few go head to head.</li>
+    </ol>
+  </div>
+  <section class="stack">
+    <span class="eyebrow">Who is this about?</span>
+    <div class="modes">
+      <button type="button" class="mode" data-mode="self" aria-pressed="${!other()}"><strong>Me</strong><span class="muted small">Find your own likely type.</span></button>
+      <button type="button" class="mode" data-mode="other" aria-pressed="${other()}"><strong>Someone I know</strong><span class="muted small">Answer for a spouse or friend, then send them your code.</span></button>
+    </div>
+  </section>
+  ${other() ? `<section class="stack"><label for="about">Their first name</label><input type="text" id="about" value="${h(st.about)}" placeholder="Sarah"></section>` : ""}
+  <div class="row"><button type="button" id="start">${started ? "Continue" : "Start"}</button>${started ? `<button type="button" class="secondary" id="reset">Start over</button>` : ""}</div>`;
+}
+
+const ROUND_NAMES = ["Getting to know you", "Narrowing it down", "Final round", "Your wing"];
+function stageBar(p) {
+  const left = p.round === 1 ? `${ROUND1.filter((k) => !(k in st.ans)).length} left in this round` : p.round === 2 ? `${p.alive.length} types still in the running` : p.round === 3 ? `${p.finalists.length} finalists` : `${6 - Object.keys(st.ans).filter((k) => k.startsWith("w:")).length} left`;
+  return `<div class="stages" aria-hidden="true">${[1, 2, 3, 4].map((n) => `<span class="${n <= p.round ? "on" : ""}"></span>`).join("")}</div>
+  <span class="eyebrow">${ROUND_NAMES[p.round - 1]} · ${left}</span>`;
+}
+
+function textFor(key) {
+  if (key.startsWith("x:")) { const [, pair, i] = key.split(":"); return TIE[pair][i][1]; }
+  if (key.startsWith("w:")) { const [, w, k] = key.split(":"); return WING[w][k]; }
+  const [t, k] = key.split(".").map(Number); return BANK[t][k];
+}
+function statement(p) {
+  const v = st.ans[p.key];
+  return `${stageBar(p)}
+  <div class="panel"><p class="statement">${h(textFor(p.key))}</p></div>
+  <span class="eyebrow">How often is this true of ${h(who())}?</span>
+  <div class="rate">${SCALE.map((l, i) => `<button type="button" data-v="${i}" aria-pressed="${v === i}">${l}</button>`).join("")}</div>
+  <div class="row"><button type="button" class="secondary" id="back">Back</button></div>`;
+}
+
+function duel(p) {
+  const flip = hash(p.key + p.k) % 2, [x, y] = flip ? [p.b, p.a] : [p.a, p.b];
+  return `${stageBar(p)}
+  <h2>Which lights ${other() ? h(who()) : "you"} up more?</h2>
+  <p class="muted small">If both are true, pick the one that comes first without effort, the one that's been true the longest. If you really can't choose, “Both equally” is a fine answer.</p>
+  <div class="versus">
+    <button type="button" class="side" data-duel="${x === p.a ? "a" : "b"}">${h(CORE[x][p.k])}</button>
+    <div class="or">or</div>
+    <button type="button" class="side" data-duel="${y === p.a ? "a" : "b"}">${h(CORE[y][p.k])}</button>
+  </div>
+  <div class="alt">
+    <button type="button" class="secondary" data-duel="both">Both equally</button>
+    <button type="button" class="secondary" data-duel="neither">Neither, really</button>
+  </div>
+  <div class="row"><button type="button" class="secondary" id="back">Back</button></div>`;
+}
+
+function result() {
+  const { order, r, wins, losses, p } = outcome(st), first = order[0], top = order.slice(0, 3), they = other();
+  const fin = p.finalists, clear = fin.length === 1;
+  const g = r[first].good, hd = r[first].hard, gAvg = g[1] ? g[0] / g[1] : 0, hAvg = hd[1] ? hd[0] / hd[1] : 0;
+  const side = gAvg > hAvg + 0.5 ? "good" : hAvg > gAvg + 0.5 ? "hard" : "both";
+  const [stress, growth] = ARROWS[first], wings = WINGS(first), runners = top.slice(1);
+  const onLines = runners.filter((t) => t === stress || t === growth), onWings = runners.filter((t) => wings.includes(t));
+  const guess = Number(st.guess) || 0, count = st.history.length;
+  const avgs = TYPES.map((t) => r[t].avg), flat = Math.max(...avgs) - Math.min(...avgs) < 1;
+  const theirTop = st.otherCode ? decodeTop(st.otherCode) : null;
+  const sideText = {
+    good: `${they ? "They" : "You"} related more to the good-day side of ${an(first)}. That often means growth is already happening.`,
+    hard: `${they ? "They" : "You"} related more to the hard-day side of ${an(first)}. That may just be a heavy season, and it shows where grace can meet ${they ? "them" : "you"}.`,
+    both: `${they ? "They" : "You"} related to both the good-day and hard-day sides of ${an(first)}. Seeing both is a strong sign the type fits.`,
+  }[side];
+  const statementLeader = [...TYPES].sort(byAvg(r))[0];
+  const how = clear ? `Type ${first} pulled clearly ahead, so the final round wasn't needed.`
+    : statementLeader === first && wins[first] >= losses[first] ? `Type ${first} led ${they ? "their" : "your"} statements, and the final round confirmed it (${wins[first]} won, ${losses[first]} lost).`
+    : statementLeader === first ? `Type ${first} led ${they ? "their" : "your"} statements clearly enough to stay on top, even though the final round leaned toward Type ${fin.filter((t) => t !== first).sort((x, y) => wins[y] - wins[x])[0]}. Keep that one in view.`
+    : `Type ${statementLeader} led ${they ? "their" : "your"} statements, but it was close, and Type ${first} won the final round (${wins[first]} won, ${losses[first]} lost). Hold both.`;
+  return `
+  <section class="stack">
+    <span class="eyebrow">${they ? `Your view of ${h(who())}` : "Your likely type"} · still exploring</span>
+    <h1>${flat ? "No type stood out yet" : `Type ${first}, ${T[first].name}`}</h1>
+    <p class="muted">${flat ? `${they ? "Their" : "Your"} answers were very even across all nine types, so the types below are only a loose starting point.` : how} ${count} answers in all.</p>
+  </section>
+  ${flat ? `<p class="note small">That's common when every statement feels \u201csometimes true.\u201d Try again picturing one specific season, or have someone who knows ${they ? "them" : "you"} well take it about ${they ? "them" : "you"}.</p>` : ""}
+  <div class="panel"><span class="eyebrow">How it narrowed down</span>
+    <p class="small"><strong>Set aside after round 1:</strong> ${p.out1.length ? p.out1.join(", ") : "none"}</p>
+    <p class="small"><strong>Set aside in round 2:</strong> ${TYPES.filter((t) => !p.out1.includes(t) && !fin.includes(t)).join(", ") || "none"}</p>
+    <p class="small"><strong>Final round:</strong> ${fin.join(" vs. ")}${clear ? " (won outright)" : ""}</p>
+  </div>
+  <div class="panel"><span class="eyebrow">Good day or hard day?</span><p>${sideText}</p></div>
+  ${(() => { const wr = flat ? null : wingRead(st, first); if (!wr) return "";
+    const Y = they ? "They" : "You";
+    const side = (w) => `the ${w} side (${FLAVOR[w]})`;
+    const slight = Math.abs(wr.va - wr.vb) >= 0.25 ? `, with a little more of the ${wr.hi} side` : "";
+    const line = wr.kind === "none" ? `Neither neighboring type stood out much. That's a fine answer; plenty of people don't lean either way.`
+      : wr.kind === "both" ? `${Y} draw on both neighboring types about equally${slight}.`
+      : `${Y} draw on both neighboring types, with more of ${side(wr.hi)} than ${side(wr.lo)}.`;
+    const bar = (w, v) => `<div class="bar"><b>${w}</b><div class="track"><div class="fill" style="width:${(v / 4) * 100}%"></div></div><span>${["Never", "Rarely", "Sometimes", "Often", "Almost always"][Math.round(v)]}</span></div>`;
+    const youify = (s) => they ? s.replace(/\bYour\b/g, "Their").replace(/\byour\b/g, "their").replace(/\bYou\b/g, "They").replace(/\byou\b/g, "they") : s;
+    const detail = (w) => { const d = WINGTEXT[`${first}-${w}`]; return `<div class="stack" style="gap:8px;border-top:1px solid var(--line);padding-top:14px">
+      <h3>The ${w} side: ${FLAVOR[w]}</h3>
+      <p>${h(youify(d.adds))}</p>
+      <p class="small"><strong>The gift:</strong> ${h(youify(d.gift))}</p>
+      <p class="small"><strong>Watch for:</strong> ${h(youify(d.watch))}</p>
+      <p class="small"><strong>Lean into it when:</strong> ${h(youify(d.use))}</p></div>`; };
+    return `<div class="panel"><span class="eyebrow">${they ? "Their" : "Your"} wings</span><p>${line}</p>
+      <div class="bars">${bar(wr.a, wr.va)}${bar(wr.b, wr.vb)}</div>
+      ${detail(wr.hi)}${detail(wr.lo)}
+      <p class="muted small">Your wings are the two types on either side of yours. Most people draw on both, often more of one in certain settings, like leading at work versus relaxing at home. This isn't a label, and wings have very little research behind them.</p></div>`; })()}
+  ${top.map((t, i) => `<div class="panel"><span class="tag">${i === 0 ? "Most likely" : "Also possible"}</span><h3>Type ${t}, ${T[t].name}</h3>
+    <p><strong>${they ? "Their" : "Your"} gift:</strong> ${h(T[t].gift)}</p>
+    <p class="muted"><strong>The hard part:</strong> ${h(T[t].struggle)}</p>
+    <p class="muted"><strong>Growing in Christ:</strong> ${h(T[t].heart)} <span class="small">(${T[t].verse})</span></p></div>`).join("")}
+  ${flat || they ? "" : (() => {
+    const b = BIBLE[first], w = WEEKS[first][weekIndex()];
+    const growing = Object.keys(st.ans).filter((k) => k.startsWith(first + ".") && Number(k.split(".")[1]) % 2 === 0 && st.ans[k] >= 3).map((k) => BANK[first][Number(k.split(".")[1])]);
+    return `<div class="panel"><span class="eyebrow">This week</span>
+      <h3>${h(w.id)}</h3>
+      <div class="stack" style="gap:6px"><span class="eyebrow">Ways you're growing</span>
+        ${growing.length ? `<p>You said these are often true of you. That's the good-day side of a ${first}, and it's worth noticing:</p>
+        <ul style="margin:0;padding-left:20px">${growing.slice(0, 3).map((g) => `<li>${h(g)}</li>`).join("")}</ul>` : `<p>Growth often starts small. This week, watch for one moment where ${T[first].gift.split(".")[0].toLowerCase()} shows up in you.</p>`}</div>
+      <div class="stack" style="gap:6px"><span class="eyebrow">Memory verse \u00b7 ${w.ref}</span>
+        <label for="translation" class="small">Your Bible translation</label>
+        <select id="translation">${VERSIONS.map(([v, l]) => `<option value="${v}" ${(st.translation || "NIV") === v ? "selected" : ""}>${l} (${v})</option>`).join("")}</select>
+        ${(st.translation || "NIV") === "KJV" ? `<p style="font-family:var(--display);font-size:20px;line-height:1.45">\u201c${h(w.verse)}\u201d</p><p class="muted small">${w.ref} (KJV)</p>`
+          : `<p><a href="${bgLink(w.ref, st.translation || "NIV")}" target="_blank" rel="noopener">Read ${w.ref} in the ${st.translation || "NIV"}</a></p>
+             <p class="muted small">Write it on a card or in your phone's notes and read it each morning this week.</p>`}</div>
+      <div class="stack" style="gap:6px"><span class="eyebrow">Breath prayer</span>
+        <p><span class="muted small">Breathe in:</span> <strong>${h(w.inhale)}</strong><br><span class="muted small">Breathe out:</span> <strong>${h(w.exhale)}</strong></p>
+        <p class="muted small">Pray it slowly, a few times, whenever you need to come back to center.</p></div>
+    </div>
+    <div class="panel"><span class="eyebrow">Someone in Scripture with a similar pattern</span>
+      <h3>${b.who}</h3>
+      <p><strong>Strengths:</strong> ${h(b.strengths)} <span class="muted small">(${b.refsS})</span></p>
+      <p><strong>Struggles:</strong> ${h(b.struggles)} <span class="muted small">(${b.refsW})</span></p>
+      <p><strong>How God used ${b.who === "Martha" ? "her" : "him"}:</strong> ${h(b.used)} <span class="muted small">(${b.refsU})</span></p>
+      <p class="muted small">We can't know anyone's type for certain, including people in the Bible. These are patterns we can see in their stories.</p>
+      <div class="row"><button type="button" class="secondary" id="tobible">See all nine</button></div>
+    </div>`; })()}
+  <div class="panel"><span class="eyebrow">How the pieces fit</span>
+    <p>Enneagram teachers describe ${an(first)} moving toward <strong>${stress}</strong> under stress and toward <strong>${growth}</strong> when growing, with <strong>${wings.join(" or ")}</strong> as neighboring types.</p>
+    <p class="muted">${onLines.length || onWings.length ? `${[...onLines.map((t) => `${t} is on a stress or growth line`), ...onWings.map((t) => `${t} is a neighboring type`)].join(", and ")}. That fits the picture of ${an(first)} in different seasons.` : `${runners.join(" and ")} aren't on ${an(first)}'s usual lines. That doesn't rule anything out.`}</p>
+    <p class="muted small">This is Enneagram teaching, not research.</p></div>
+  ${they ? "" : `<div class="panel" id="before">
+    <label for="guess">Before today, what did you think your type was?</label>
+    <select id="guess">${[["", "Choose one"], ["0", "I had no idea"], ...TYPES.map((n) => [String(n), `${n}, ${T[n].name}`])].map(([v, l]) => `<option value="${v}" ${String(st.guess) === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    ${guess ? `<label for="sure">How sure were you?</label>
+    <select id="sure">${[["", "Choose one"], ["1", "Just a guess"], ["2", "Fairly sure"], ["3", "Very sure"]].map(([v, l]) => `<option value="${v}" ${st.sure === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <p class="note">${guess === first ? `That matches what the finder found.` : top.includes(guess) ? `Type ${guess} is in your top three. Compare its gift and hard part with Type ${first}'s and see which feels more like home.` : `The finder set Type ${guess} aside along the way. Read its gift and hard part again; it may fit a different season of your life, or the finder may have missed. Both happen.`}</p>` : st.guess === "0" ? `<p class="muted small">That's common. Give this result a few weeks and see if it keeps fitting.</p>` : ""}
+  </div>`}
+  <div class="panel"><span class="eyebrow">Average answer by type</span>
+    <div class="bars">${[...TYPES].sort(byAvg(r)).map((t) => `<div class="bar ${top.includes(t) ? "top" : ""}"><b>${t}</b><div class="track"><div class="fill" style="width:${(r[t].avg / 4) * 100}%"></div></div><span>${r[t].n} asked</span></div>`).join("")}</div>
+    <p class="muted small">Full bar means “Almost always” on average. Types set aside early were asked fewer statements.</p>
+  </div>
+  <div class="panel">
+    <span class="eyebrow">${they ? `Send this to ${h(who())}` : "Compare with someone who knows you"}</span>
+    <code class="share" id="code">${encode(st)}</code>
+    <div class="row"><button type="button" class="secondary" id="copy">Copy code</button><span class="muted small" id="copied" role="status"></span></div>
+    <label for="othercode">Paste someone else's code</label>
+    <input type="text" id="othercode" value="${h(st.otherCode)}" placeholder="Y5-...">
+    <div class="row"><button type="button" id="compare">Compare</button></div>
+  </div>
+  ${theirTop ? `<div class="panel"><span class="eyebrow">Compared with their answers</span>
+    <p>Your top three: <strong>${top.join(", ")}</strong>. Theirs: <strong>${theirTop.join(", ")}</strong>.</p>
+    <p class="muted">${theirTop[0] === first ? "You both put the same type first." : `They put Type ${theirTop[0]} first. That's worth a gentle conversation, not a ruling.`}</p></div>`
+    : st.otherCode.trim() ? `<p class="note small">That code doesn't look right. It should look like Y5-713.</p>` : ""}
+  ${they ? "" : `<div class="panel" id="sendpanel">
+    <span class="eyebrow">Helping test this?</span>
+    <p>Send your results to the person who shared this link. Answer two quick questions, then copy your results and text or email them.</p>
+    <label for="tname">Your first name or initials</label>
+    <input type="text" id="tname" value="${h(st.tname)}" placeholder="J.G.">
+    <label for="feel">Does the result feel right?</label>
+    <select id="feel">${[["", "Choose one"], ["1", "Not at all"], ["2", "Partly"], ["3", "Mostly"], ["4", "Spot on"]].map(([v, l]) => `<option value="${v}" ${st.feel === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <label for="note">Anything that felt off or confusing? (optional)</label>
+    <textarea id="note" placeholder="A statement that was hard to answer, or why the result doesn't fit">${h(st.note)}</textarea>
+    <div class="row"><button type="button" id="copyresults">Copy my results</button><span class="muted small" id="copiedresults" role="status"></span></div>
+    <code class="share" id="resultcode" hidden></code>
+  </div>`}
+  <div class="row"><button type="button" class="secondary" id="back">Change my last answer</button><button type="button" class="secondary" id="restart">Start over</button></div>
+  <p class="muted small">The Enneagram is a helpful lens, not a scientifically settled category. It describes how someone might be wired. It doesn't tell you their story.</p>`;
+}
+
+// Tester results: everything needed to rerun the finder, in one line of text.
+const ALLKEYS = [
+  ...TYPES.flatMap((t) => BANK[t].map((_, k) => `${t}.${k}`)),
+  ...Object.keys(TIE).flatMap((p) => TIE[p].map((_, i) => `x:${p}:${i}`)),
+  ...TYPES.flatMap((t) => WING[t].map((_, k) => `w:${t}:${k}`)),
+];
+const DUELCODE = { a: "a", b: "b", both: "=", neither: "0" }, DUELBACK = { a: "a", b: "b", "=": "both", "0": "neither" };
+function resultsCode(s) {
+  const raw = ALLKEYS.map((k) => k in s.ans ? String(s.ans[k]) : ".").join("").replace(/\.+/g, (m) => m.length > 2 ? `_${m.length.toString(36)}_` : m);
+  const duels = Object.entries(s.duel).filter(([, v]) => v.length).map(([k, v]) => k.replace("-", "") + v.map((x) => DUELCODE[x]).join("")).join(",");
+  return ["YADA1", encodeURIComponent(s.tname.trim()), `${s.guess || 0}${s.sure || 0}${s.feel || 0}`, raw, duels, encodeURIComponent(s.note.trim())].join("|");
+}
+function readResults(code) {
+  const parts = code.trim().split("|"); if (parts[0] !== "YADA1" || parts.length < 6) return null;
+  try {
+    const raw = parts[3].replace(/_([0-9a-z]+)_/g, (_, n) => ".".repeat(parseInt(n, 36)));
+    if (raw.length !== ALLKEYS.length) return null;
+    const ans = {}; ALLKEYS.forEach((k, i) => { if (raw[i] !== ".") ans[k] = Number(raw[i]); });
+    const duel = {}; parts[4].split(",").filter(Boolean).forEach((d) => { duel[`${d[0]}-${d[1]}`] = d.slice(2).split("").map((x) => DUELBACK[x]); });
+    const [guess, sure, feel] = parts[2].split("").map(Number);
+    return { name: decodeURIComponent(parts[1]) || "Anonymous", guess, sure, feel, note: decodeURIComponent(parts[5]), ans, duel };
+  } catch { return null; }
+}
+
+// The organizer's view: paste the codes testers sent back.
+let inbox = (() => { try { return localStorage.getItem(KEY + "-inbox") || ""; } catch { return ""; } })();
+function inboxView() {
+  const rows = inbox.split(/\n+/).map((l) => l.trim()).filter(Boolean).map((line) => ({ line, r: readResults(line) }));
+  const good = rows.filter((x) => x.r).map(({ r }) => {
+    const s = { ans: r.ans, duel: r.duel }, o = outcome(s), first = o.order[0], top = o.order.slice(0, 3), wr = wingRead(s, first);
+    const avgs = TYPES.map((t) => o.r[t].avg), flat = Math.max(...avgs) - Math.min(...avgs) < 1;
+    return { ...r, first, top, flat, wr, count: Object.keys(r.ans).length + Object.values(r.duel).flat().length };
+  });
+  const bad = rows.filter((x) => !x.r).length;
+  const known = good.filter((g) => g.guess && g.sure >= 2);
+  const pct = (n, d) => d ? `${Math.round((n / d) * 100)}%` : "\u2013";
+  const hit1 = known.filter((g) => g.first === g.guess).length, hit3 = known.filter((g) => g.top.includes(g.guess)).length;
+  const FEEL = ["", "Not at all", "Partly", "Mostly", "Spot on"], SURE = ["", "guess", "fairly sure", "very sure"];
+  // Statements that people of other types also rate high don't help tell types apart.
+  const weak = [];
+  if (known.length) for (const key of ALLKEYS) {
+    if (key.startsWith("w:")) continue;
+    const owner = key.startsWith("x:") ? TIE[key.split(":")[1]][key.split(":")[2]][0] : Number(key.split(".")[0]);
+    const others = known.filter((g) => g.guess !== owner && key in g.ans).map((g) => g.ans[key]);
+    if (others.length >= 3) { const avg = others.reduce((a, b) => a + b, 0) / others.length; if (avg >= 2.5) weak.push({ key, owner, avg, n: others.length }); }
+  }
+  weak.sort((a, b) => b.avg - a.avg);
+  return `
+  <section class="stack">
+    <span class="eyebrow">Organizer view</span>
+    <h1>Tester results</h1>
+    <p class="muted">Paste the result codes people sent you, one per line. They stay in this browser only.</p>
+  </section>
+  <textarea id="inbox" style="min-height:140px" placeholder="YADA1|...">${h(inbox)}</textarea>
+  <div class="row"><button type="button" id="tally">Tally results</button><button type="button" class="secondary" id="toquiz">Back to the finder</button></div>
+  ${bad ? `<p class="note small">${bad} line${bad > 1 ? "s" : ""} didn't look like a result code and ${bad > 1 ? "were" : "was"} skipped.</p>` : ""}
+  ${good.length ? `
+  <div class="panel"><span class="eyebrow">Summary</span>
+    <p><strong>${good.length}</strong> tester${good.length > 1 ? "s" : ""}. Average ${Math.round(good.reduce((a, g) => a + g.count, 0) / good.length)} answers each.</p>
+    <p>Of the ${known.length} who were fairly or very sure of their type: <strong>${pct(hit1, known.length)}</strong> got it first, <strong>${pct(hit3, known.length)}</strong> had it in their top three.</p>
+    <p class="muted">Felt right: ${[4, 3, 2, 1].map((f) => `${FEEL[f]} ${good.filter((g) => g.feel === f).length}`).join(" \u00b7 ")}</p>
+  </div>
+  <div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:14px;min-width:560px;width:100%">
+    <thead><tr>${["Tester", "Thought", "Finder said", "Top 3", "Wings", "Felt right", "Answers"].map((x) => `<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)">${x}</th>`).join("")}</tr></thead>
+    <tbody>${good.map((g) => `<tr>
+      <td style="padding:6px 8px;border-bottom:1px solid var(--line)">${h(g.name)}${g.note ? `<div class="muted small">\u201c${h(g.note)}\u201d</div>` : ""}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid var(--line)">${g.guess ? `${g.guess} <span class="muted small">(${SURE[g.sure] || "?"})</span>` : "\u2013"}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid var(--line)">${g.flat ? "No clear type" : g.first}${g.guess && g.sure >= 2 ? (g.first === g.guess ? " \u2713" : g.top.includes(g.guess) ? " ~" : " \u2717") : ""}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid var(--line)">${g.top.join(", ")}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid var(--line)">${g.wr && g.wr.kind !== "none" ? (g.wr.kind === "both" ? `${g.wr.a} & ${g.wr.b}` : `more ${g.wr.hi}`) : "\u2013"}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid var(--line)">${FEEL[g.feel] || "\u2013"}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid var(--line)">${g.count}</td></tr>`).join("")}</tbody>
+  </table></div>
+  <p class="muted small">\u2713 matches the type they were sure of. ~ in their top three. \u2717 missed.</p>
+  <div class="panel"><span class="eyebrow">Statements that may not help</span>
+    ${weak.length ? `<p class="muted small">People of other types also rated these \u201cOften\u201d or higher, so they don't separate types well. Consider rewriting them.</p>
+    ${weak.slice(0, 12).map((w) => `<p class="small"><strong>${w.owner}:</strong> ${h(textFor(w.key))} <span class="muted">(avg ${w.avg.toFixed(1)} from ${w.n} others)</span></p>`).join("")}`
+    : `<p class="muted small">Nothing flagged yet. This needs at least three testers of other types to have seen a statement.</p>`}
+  </div>` : ""}`;
+}
+
+function bibleView() {
+  return `
+  <section class="stack">
+    <span class="eyebrow">People in Scripture</span>
+    <h1>Nine patterns, one faithful God</h1>
+    <p class="muted">Each of these people had real gifts and real struggles, and God used them for His glory. We can't know anyone's type for certain, including people in the Bible. These are patterns we can see in their stories.</p>
+  </section>
+  ${TYPES.map((n) => { const b = BIBLE[n]; return `<div class="panel"><span class="eyebrow">Type ${n} \u00b7 ${T[n].name}</span><h3>${b.who}</h3>
+    <p><strong>Strengths:</strong> ${h(b.strengths)} <span class="muted small">(${b.refsS})</span></p>
+    <p><strong>Struggles:</strong> ${h(b.struggles)} <span class="muted small">(${b.refsW})</span></p>
+    <p><strong>How God used ${["Martha"].includes(b.who) ? "her" : "him"}:</strong> ${h(b.used)} <span class="muted small">(${b.refsU})</span></p></div>`; }).join("")}
+  <div class="row"><button type="button" id="toquiz">Back</button></div>`;
+}
+
+function aboutView(required) {
+  return `
+  ${required ? `<div class="readbar" aria-hidden="true"><div id="readprogress"></div></div>` : ""}
+  <article class="read">
+    <span class="eyebrow">${required ? "Before you begin \u00b7 " : ""}A two-minute read</span>
+    <h1>What the Enneagram is, and what it isn't</h1>
+
+    <p class="lede"><em>Yada</em> (yah-DAH) is the Hebrew word for knowing someone deeply: not just knowing <em>about</em> them, but really knowing them. It's the word used in Psalm 139:</p>
+    <p class="quote">\u201cO LORD, you have searched me and known me!\u201d<cite>Psalm 139:1 (ESV)</cite></p>
+    <p><strong>Only God can fully know someone.</strong> He made us, He sees every part of us, and nothing about us is hidden from Him. No test, no type, and no amount of time with a person will ever give us that kind of knowing.</p>
+    <p>What we can do is know each other better. That's what Yada is about: knowing yourself honestly and knowing the people God has put in your life well enough to love them better, whether that's your spouse, your kids, your friends, or the people you work with. The Enneagram is one of the tools we use to get there, so before you start, here's what it is and what it isn't.</p>
+
+    <p class="orn" aria-hidden="true">\u05d9</p>
+    <h2>What it is</h2>
+    <p>The Enneagram describes nine common patterns in how people see the world: what they want most, what they're afraid of, and how they react when they're stressed and when they're growing.</p>
+    <p>It's useful because it looks past <em>what</em> you do to <em>why</em> you do it. Two people can do the very same thing for completely different reasons, and that's usually where misunderstandings start.</p>
+
+    <p class="orn" aria-hidden="true">\u05d9</p>
+    <h2>What it isn't</h2>
+    <div class="isnt">
+      <p><strong>It isn't Christian in itself.</strong> Yada uses it within a Christ-centered approach, as a tool rather than a belief system.</p>
+      <p><strong>It isn't Scripture.</strong> God's Word is the measure. The Enneagram is, at most, a mirror.</p>
+      <p><strong>It isn't your identity.</strong> Who you are is settled by God, not by a number. He made you and calls you His own.</p>
+      <p><strong>It isn't an excuse.</strong> \u201cThat's just how I'm wired\u201d is never a reason to stay stuck or to hurt someone.</p>
+      <p><strong>It isn't a label for other people.</strong> Knowing someone's type doesn't mean you know them.</p>
+      <p><strong>It isn't always right.</strong> Research on it shows mixed results, and no test gets everyone right. It's a great start, not a final answer.</p>
+    </div>
+
+    <p class="orn" aria-hidden="true">\u05d9</p>
+    <h2>How Yada uses it</h2>
+    <p>Yada uses the Enneagram to help you find what makes you <em>you</em> at the core: what drives you, what you bring to people on a good day, and the blind spots you might not see in yourself.</p>
+    <p>Then it helps you take that into your relationships. Sometimes that means looking at your own heart first and noticing an area of growth you've been missing. Sometimes it means understanding someone who wants exactly what you want but goes after it in a completely different way. And sometimes it means finding a way to talk with someone whose goals are simply different from yours, so you can both be heard.</p>
+    <p>The Enneagram is never for winning an argument, managing people, or deciding what's in someone's heart. That belongs to God alone.</p>
+
+    <p class="orn" aria-hidden="true">\u05d9</p>
+    <p class="close">Only God fully knows a person. The rest of us have to listen, ask, and hear each other's stories. Yada is a small help along the way.</p>
+  </article>
+  ${required ? `<div class="row"><button type="button" id="ack">I understand. Let's begin</button><button type="button" class="secondary" id="readback">Back</button></div>`
+    : `<div class="row"><button type="button" id="toquiz">Back to the finder</button></div>`}`;
+}
+
+// Reading progress for the required read.
+window.addEventListener("scroll", () => {
+  const bar = document.getElementById("readprogress"); if (!bar) return;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  bar.style.width = `${max > 0 ? Math.min(100, (scrollY / max) * 100) : 100}%`;
+}, { passive: true });
+
+function answer(rec) { st.history = [...st.history, rec]; save(); render(); window.scrollTo(0, 0); }
+function undo() {
+  const last = st.history[st.history.length - 1]; if (!last) return set({ step: "intro" });
+  if (last.s) { const ans = { ...st.ans }; delete ans[last.s]; st.ans = ans; }
+  if (last.d) { const duel = { ...st.duel }; duel[last.d] = (duel[last.d] || []).slice(0, -1); st.duel = duel; }
+  st.history = st.history.slice(0, -1); save(); render();
+}
+
+function wire() {
+  const $ = (s) => document.querySelector(s), on = (s, f) => { const el = $(s); if (el) el.onclick = f; };
+  document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => set({ mode: b.dataset.mode }));
+  if ($("#about")) $("#about").oninput = (e) => { st.about = e.target.value; save(); };
+  if ($("#guess")) $("#guess").onchange = (e) => set({ guess: e.target.value, sure: Number(e.target.value) ? st.sure : "" });
+  on("#start", () => { set({ step: st.read ? "quiz" : "read" }); window.scrollTo(0, 0); });
+  on("#ack", () => { set({ read: true, step: "quiz" }); window.scrollTo(0, 0); });
+  on("#readback", () => { set({ step: "intro" }); window.scrollTo(0, 0); });
+  on("#reset", () => { st = fresh(); save(); render(); });
+  on("#restart", () => { st = fresh(); save(); render(); window.scrollTo(0, 0); });
+  on("#back", undo);
+  document.querySelectorAll("[data-v]").forEach((b) => b.onclick = () => {
+    const p = plan(st); st.ans = { ...st.ans, [p.key]: Number(b.dataset.v) }; answer({ s: p.key });
+  });
+  document.querySelectorAll("[data-duel]").forEach((b) => b.onclick = () => {
+    const p = plan(st); st.duel = { ...st.duel, [p.key]: [...(st.duel[p.key] || []), b.dataset.duel] }; answer({ d: p.key });
+  });
+  on("#copy", () => {
+    const text = $("#code").textContent;
+    navigator.clipboard.writeText(text).then(() => { $("#copied").textContent = "Copied"; })
+      .catch(() => { const r = document.createRange(); r.selectNodeContents($("#code")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $("#copied").textContent = "Selected. Copy it from here."; });
+  });
+  if ($("#othercode")) $("#othercode").oninput = (e) => { st.otherCode = e.target.value; save(); };
+  on("#compare", () => render());
+  if ($("#translation")) $("#translation").onchange = (e) => set({ translation: e.target.value });
+  if ($("#sure")) $("#sure").onchange = (e) => set({ sure: e.target.value });
+  for (const id of ["tname", "note"]) if ($("#" + id)) $("#" + id).oninput = (e) => { st[id] = e.target.value; save(); };
+  if ($("#feel")) $("#feel").onchange = (e) => { st.feel = e.target.value; save(); };
+  on("#copyresults", () => {
+    const code = resultsCode(st), box = $("#resultcode"); box.textContent = code; box.hidden = false;
+    navigator.clipboard.writeText(code).then(() => { $("#copiedresults").textContent = "Copied. Paste it into a text or email."; })
+      .catch(() => { const r = document.createRange(); r.selectNodeContents(box); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $("#copiedresults").textContent = "Selected. Copy it from below."; });
+  });
+  if ($("#inbox")) $("#inbox").oninput = (e) => { inbox = e.target.value; try { localStorage.setItem(KEY + "-inbox", inbox); } catch {} };
+  on("#tally", () => render());
+  on("#seeresults", () => { location.hash = "results"; window.scrollTo(0, 0); });
+  on("#copyinvite", () => {
+    navigator.clipboard.writeText(INVITE).then(() => { $("#invitecopied").textContent = "Copied. Paste it into a text or email."; })
+      .catch(() => { $("#invitecopied").textContent = "Couldn't copy here. Here's the message:"; $("#invitecopied").insertAdjacentHTML("afterend", `<code class="share">${h(INVITE)}</code>`); });
+  });
+  on("#toabout", () => { location.hash = "about"; window.scrollTo(0, 0); });
+  on("#tobible", () => { location.hash = "bible"; window.scrollTo(0, 0); });
+  on("#toquiz", () => { history.replaceState(null, "", location.pathname); render(); });
+}
+
+window.addEventListener("hashchange", render);
+render();
+</script>
+
+</body>
+</html>
