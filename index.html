@@ -896,8 +896,9 @@ function shareText({ flat, first, runners }) {
     : `I took the Yada Enneagram type finder. My likely type is Type ${first}, ${T[first].name}${runners.length ? ` (also possible: ${runners.join(" and ")})` : ""}. The gift: ${T[first].gift}`;
 }
 function loadPdfLib() {
-  if (window.jspdf || document.getElementById("jspdf")) return;
-  const sc = document.createElement("script"); sc.id = "jspdf"; sc.async = true; sc.crossOrigin = "anonymous";
+  // The tag's id must not be "jspdf": an element id becomes a window global and would look like the library.
+  if (window.jspdf?.jsPDF || document.getElementById("jspdf-lib")) return;
+  const sc = document.createElement("script"); sc.id = "jspdf-lib"; sc.async = true; sc.crossOrigin = "anonymous";
   sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
   sc.integrity = "sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==";
   document.head.append(sc);
@@ -1050,7 +1051,7 @@ function sendToTeam() {
 }
 function shareResults(statusId) {
   const status = document.getElementById(statusId), text = shareMessage();
-  let file = null; try { if (window.jspdf) file = resultsPdf(); } catch {}
+  let file = null; try { if (window.jspdf?.jsPDF) file = resultsPdf(); } catch {}
   const saveFile = () => { if (!file) return false; const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.append(a); a.click(); a.remove(); return true; };
   const copy = () => { const saved = saveFile(); navigator.clipboard.writeText(text)
     .then(() => { status.textContent = saved ? "Saved your results as a PDF and copied a message to send with it." : "Copied. Paste it into a text or email."; })
