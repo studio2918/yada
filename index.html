@@ -84,6 +84,8 @@ textarea { min-height: 70px; font-size: 14px; }
 .bar b { font-family: var(--display); font-size: 18px; font-weight: 400; }
 /* The tester box is a light card in both themes so it stands out from everything else. */
 .printonly { display: none; }
+.invitebox { gap: 8px; margin-top: 6px; padding: 16px; border-radius: 12px; background: color-mix(in srgb, var(--brand) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--brand) 50%, transparent); }
+.invitebox h3 { color: var(--ink); }
 button.linkish { background: none; border: 0; padding: 0; border-radius: 0; color: var(--brand); font-weight: 500; text-align: left; text-decoration: underline; text-underline-offset: 3px; }
 .callout { --surface: #fff; --ink: #2d2620; --ink-soft: #5f554b; --line: #e3d9cb; --brand: #6b4f2e; --brand-ink: #fffaf0; --focus: #2f5c7c;
   color-scheme: light; color: var(--ink); background: #fffaf0; border: 2px solid #d9bf94; box-shadow: 0 8px 28px rgba(201, 167, 122, .35); padding: 24px 20px; }
@@ -840,10 +842,10 @@ ${person(b)}
     <div class="row"><button type="button" id="shareresults">Share my results</button><button type="button" class="secondary" id="printresults">Save as PDF or print</button></div>
     <span class="muted small" id="shared" role="status"></span>
     <label class="small" style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="nofeedback" ${st.noFeedback ? "checked" : ""}> Don't include my feedback</label>
-    <div class="stack" style="gap:8px;border-top:1px solid var(--line);padding-top:14px">
+    <div class="stack invitebox">
       <h3>Know someone who'd like this?</h3>
       <p class="small muted">Send them the link so they can find their own type. Your results stay with you.</p>
-      <div class="row"><button type="button" class="secondary" id="invitefriend">Invite someone to take it</button></div>
+      <div class="row"><button type="button" id="invitefriend">Invite someone to take it</button></div>
       <span class="muted small" id="invited" role="status"></span>
     </div>
   </div>`}
