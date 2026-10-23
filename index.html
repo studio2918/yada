@@ -95,6 +95,18 @@ code.share { display: block; font-size: 13px; word-break: break-all; background:
 .readbar { position: fixed; left: 0; right: 0; top: 0; height: calc(4px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 10; box-sizing: border-box; }
 .readbar div { height: 4px; width: 0; background: var(--brand); }
 @media (prefers-reduced-motion: reduce) { .progress div { transition: none; } }
+/* Save as PDF or print: light colors, no controls, panels kept whole. */
+@media print {
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --bg: #fff; --surface: #fff; --ink: #2d2620; --ink-soft: #5f554b; --line: #e3d9cb;
+    --brand: #6b4f2e; --brand-ink: #f3e9d8; --pick: #55704f; color-scheme: light; }
+  @page { margin: 14mm; }
+  body { font-size: 12pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  main { max-width: none; padding: 0; gap: 14px; }
+  .noprint, button, select, label[for="translation"] { display: none !important; }
+  .panel { break-inside: avoid; }
+  a { color: inherit; }
+}
 </style>
 
 <main id="app" aria-live="polite"></main>
@@ -482,14 +494,14 @@ function render() {
 const SHARE_URL = "https://studio2918.github.io/yada/";
 const INVITE = `Hey! I'm building an app called Yada and would love your help testing one piece of it. It's a short Enneagram test (about 10 minutes): ${SHARE_URL}
 
-At the end, there's a box that says "Helping test this?" Fill it in, tap "Copy my results," and text me what it copies. Honest feedback helps the most, especially if the result feels wrong!`;
+At the end, there's a box that says "Helping test this?" Fill it in, tap "Share my results," and send it to me. Honest feedback helps the most, especially if the result feels wrong!`;
 let isOwner = false;
 (async () => {
   try { const u = await window.claude?.use?.("user"); if (u && await u.isOwner()) { isOwner = true; render(); } } catch {}
 })();
 function ownerBar() {
   if (!isOwner) return "";
-  return `<div class="panel" style="border-color:var(--brand)">
+  return `<div class="panel noprint" style="border-color:var(--brand)">
     <span class="eyebrow">Only you see this \u00b7 organizer tools</span>
     <div class="row">
       <button type="button" id="copyinvite">Copy invite message</button>
@@ -591,6 +603,9 @@ function result() {
     <span class="eyebrow">${they ? `Your view of ${h(who())}` : "Your likely type"} · still exploring</span>
     <h1>${flat ? "No type stood out yet" : `Type ${first}, ${T[first].name}`}</h1>
     <p class="muted">${flat ? `${they ? "Their" : "Your"} answers were very even across all nine types, so the types below are only a loose starting point.` : how} ${count} answers in all.</p>
+    ${they ? "" : `<div class="row noprint"><button type="button" id="shareresults">Share my results</button><button type="button" class="secondary" id="printresults">Save as PDF or print</button><span class="muted small" id="shared" role="status"></span></div>
+    <label class="small noprint" style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="nofeedback" ${st.noFeedback ? "checked" : ""}> Don't include my feedback</label>
+    ${!st.noFeedback && !st.feel && !st.note.trim() ? `<p class="muted small noprint">Helping test this? Add your feedback in the box at the bottom first, and it'll go along with your results.</p>` : ""}`}
   </section>
   ${flat ? `<p class="note small">That's common when every statement feels \u201csometimes true.\u201d Try again picturing one specific season, or have someone who knows ${they ? "them" : "you"} well take it about ${they ? "them" : "you"}.</p>` : ""}
   <div class="panel"><span class="eyebrow">How it narrowed down</span>
@@ -652,7 +667,7 @@ function result() {
     <p>Enneagram teachers describe ${an(first)} moving toward <strong>${stress}</strong> under stress and toward <strong>${growth}</strong> when growing, with <strong>${wings.join(" or ")}</strong> as neighboring types.</p>
     <p class="muted">${onLines.length || onWings.length ? `${[...onLines.map((t) => `${t} is on a stress or growth line`), ...onWings.map((t) => `${t} is a neighboring type`)].join(", and ")}. That fits the picture of ${an(first)} in different seasons.` : `${runners.join(" and ")} aren't on ${an(first)}'s usual lines. That doesn't rule anything out.`}</p>
     <p class="muted small">This is Enneagram teaching, not research.</p></div>
-  ${they ? "" : `<div class="panel" id="before">
+  ${they ? "" : `<div class="panel noprint" id="before">
     <label for="guess">Before today, what did you think your type was?</label>
     <select id="guess">${[["", "Choose one"], ["0", "I had no idea"], ...TYPES.map((n) => [String(n), `${n}, ${T[n].name}`])].map(([v, l]) => `<option value="${v}" ${String(st.guess) === v ? "selected" : ""}>${l}</option>`).join("")}</select>
     ${guess ? `<label for="sure">How sure were you?</label>
@@ -663,7 +678,7 @@ function result() {
     <div class="bars">${[...TYPES].sort(byAvg(r)).map((t) => `<div class="bar ${top.includes(t) ? "top" : ""}"><b>${t}</b><div class="track"><div class="fill" style="width:${(r[t].avg / 4) * 100}%"></div></div><span>${r[t].n} asked</span></div>`).join("")}</div>
     <p class="muted small">Full bar means “Almost always” on average. Types set aside early were asked fewer statements.</p>
   </div>
-  <div class="panel">
+  <div class="panel noprint">
     <span class="eyebrow">${they ? `Send this to ${h(who())}` : "Compare with someone who knows you"}</span>
     <code class="share" id="code">${encode(st)}</code>
     <div class="row"><button type="button" class="secondary" id="copy">Copy code</button><span class="muted small" id="copied" role="status"></span></div>
@@ -675,16 +690,16 @@ function result() {
     <p>Your top three: <strong>${top.join(", ")}</strong>. Theirs: <strong>${theirTop.join(", ")}</strong>.</p>
     <p class="muted">${theirTop[0] === first ? "You both put the same type first." : `They put Type ${theirTop[0]} first. That's worth a gentle conversation, not a ruling.`}</p></div>`
     : st.otherCode.trim() ? `<p class="note small">That code doesn't look right. It should look like Y5-713.</p>` : ""}
-  ${they ? "" : `<div class="panel" id="sendpanel">
+  ${they ? "" : `<div class="panel noprint" id="sendpanel">
     <span class="eyebrow">Helping test this?</span>
-    <p>Send your results to the person who shared this link. Answer two quick questions, then copy your results and text or email them.</p>
+    <p>Send your results and feedback to the person who shared this link. Answer two quick questions, then tap Share my results.</p>
     <label for="tname">Your first name or initials</label>
     <input type="text" id="tname" value="${h(st.tname)}" placeholder="J.G.">
     <label for="feel">Does the result feel right?</label>
     <select id="feel">${[["", "Choose one"], ["1", "Not at all"], ["2", "Partly"], ["3", "Mostly"], ["4", "Spot on"]].map(([v, l]) => `<option value="${v}" ${st.feel === v ? "selected" : ""}>${l}</option>`).join("")}</select>
     <label for="note">Anything that felt off or confusing? (optional)</label>
     <textarea id="note" placeholder="A statement that was hard to answer, or why the result doesn't fit">${h(st.note)}</textarea>
-    <div class="row"><button type="button" id="copyresults">Copy my results</button><span class="muted small" id="copiedresults" role="status"></span></div>
+    <div class="row"><button type="button" id="shareresults2">Share my results</button><button type="button" class="secondary" id="copyresults">Copy code instead</button><span class="muted small" id="copiedresults" role="status"></span></div>
     <code class="share" id="resultcode" hidden></code>
   </div>`}
   <div class="row"><button type="button" class="secondary" id="back">Change my last answer</button><button type="button" class="secondary" id="restart">Start over</button></div>
@@ -718,7 +733,7 @@ function readResults(code) {
 // The organizer's view: paste the codes testers sent back.
 let inbox = (() => { try { return localStorage.getItem(KEY + "-inbox") || ""; } catch { return ""; } })();
 function inboxView() {
-  const rows = inbox.split(/\n+/).map((l) => l.trim()).filter(Boolean).map((line) => ({ line, r: readResults(line) }));
+  const rows = (inbox.match(/YADA1\|\S+/g) || []).map((line) => ({ line, r: readResults(line) }));
   const good = rows.filter((x) => x.r).map(({ r }) => {
     const s = { ans: r.ans, duel: r.duel }, o = outcome(s), first = o.order[0], top = o.order.slice(0, 3), wr = wingRead(s, first);
     const avgs = TYPES.map((t) => o.r[t].avg), flat = Math.max(...avgs) - Math.min(...avgs) < 1;
@@ -742,11 +757,11 @@ function inboxView() {
   <section class="stack">
     <span class="eyebrow">Organizer view</span>
     <h1>Tester results</h1>
-    <p class="muted">Paste the result codes people sent you, one per line. They stay in this browser only.</p>
+    <p class="muted">Paste the messages or result codes people sent you. Whole messages are fine; the codes are found in them. They stay in this browser only.</p>
   </section>
   <textarea id="inbox" style="min-height:140px" placeholder="YADA1|...">${h(inbox)}</textarea>
   <div class="row"><button type="button" id="tally">Tally results</button><button type="button" class="secondary" id="toquiz">Back to the finder</button></div>
-  ${bad ? `<p class="note small">${bad} line${bad > 1 ? "s" : ""} didn't look like a result code and ${bad > 1 ? "were" : "was"} skipped.</p>` : ""}
+  ${bad ? `<p class="note small">${bad} code${bad > 1 ? "s" : ""} couldn't be read and ${bad > 1 ? "were" : "was"} skipped.</p>` : ""}
   ${good.length ? `
   <div class="panel"><span class="eyebrow">Summary</span>
     <p><strong>${good.length}</strong> tester${good.length > 1 ? "s" : ""}. Average ${Math.round(good.reduce((a, g) => a + g.count, 0) / good.length)} answers each.</p>
@@ -842,8 +857,78 @@ function undo() {
   st.history = st.history.slice(0, -1); save(); render();
 }
 
+// Share my results: the phone's share sheet gets a picture of the result plus a short message.
+// The picture is drawn ahead of time, because Safari only opens the sheet straight from a tap.
+function shareSummary() {
+  const { order, r } = outcome(st), avgs = TYPES.map((t) => r[t].avg);
+  return { flat: Math.max(...avgs) - Math.min(...avgs) < 1, first: order[0], runners: order.slice(1, 3) };
+}
+function shareText({ flat, first, runners }) {
+  return flat ? `I took the Yada Enneagram type finder. My answers were pretty even across all nine types, so I'm still exploring.`
+    : `I took the Yada Enneagram type finder. My likely type is Type ${first}, ${T[first].name}${runners.length ? ` (also possible: ${runners.join(" and ")})` : ""}. The gift: ${T[first].gift}`;
+}
+let card = { key: "", file: null };
+function prepareCard() {
+  const sm = shareSummary(), key = JSON.stringify(sm);
+  if (card.key === key) return;
+  card = { key, file: null };
+  drawCard(sm).then((file) => { if (card.key === key) card.file = file; }).catch(() => {});
+}
+async function drawCard({ flat, first, runners }) {
+  try { await Promise.race([Promise.all([document.fonts.load("84px Ovo"), document.fonts.load("700 30px Karla"), document.fonts.load('900 64px "Frank Ruhl Libre"', "י")]), new Promise((r) => setTimeout(r, 3000))]); } catch {}
+  const W = 1080, H = 1350, X = 96, MAX = W - 2 * X, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const g = c.getContext("2d"), ink = "#2d2620", soft = "#5f554b", brand = "#6b4f2e";
+  const font = (f, color) => { g.font = f; g.fillStyle = color; };
+  const wrap = (text, y, lh) => { let line = ""; for (const w of text.split(" ")) { const t = line ? line + " " + w : w; if (g.measureText(t).width > MAX && line) { g.fillText(line, X, y); y += lh; line = w; } else line = t; } g.fillText(line, X, y); return y + lh; };
+  g.fillStyle = "#f7f2ea"; g.fillRect(0, 0, W, H);
+  g.fillStyle = brand; g.beginPath(); g.roundRect(X, 90, 96, 96, 24); g.fill();
+  font('900 64px "Frank Ruhl Libre", "Times New Roman", serif', "#f3e9d8"); g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("י", X + 48, 140);
+  g.textAlign = "left"; g.textBaseline = "alphabetic";
+  font('56px Ovo, Georgia, serif', ink); g.fillText("Yada", X + 124, 158);
+  font('700 28px Karla, system-ui, sans-serif', soft); g.fillText("MY LIKELY ENNEAGRAM TYPE", X, 300);
+  let y;
+  if (flat) { font('84px Ovo, Georgia, serif', ink); y = wrap("Still exploring. No type stood out yet.", 410, 100); }
+  else {
+    font('150px Ovo, Georgia, serif', ink); g.fillText(`Type ${first}`, X, 450);
+    font('84px Ovo, Georgia, serif', ink); y = wrap(T[first].name, 560, 96);
+    g.fillStyle = "#e3d9cb"; g.fillRect(X, y - 20, MAX, 3); y += 60;
+    font('700 28px Karla, system-ui, sans-serif', soft); g.fillText("THE GIFT", X, y); y += 64;
+    font('46px Ovo, Georgia, serif', ink); y = wrap(T[first].gift, y, 60) + 30;
+    font('700 28px Karla, system-ui, sans-serif', soft); g.fillText("GROWING IN CHRIST", X, y); y += 56;
+    font('36px Karla, system-ui, sans-serif', ink); y = wrap(T[first].heart, y, 50) + 20;
+    if (runners.length) { font('34px Karla, system-ui, sans-serif', soft); wrap(`Also possible: Type ${runners.join(" and ")}`, y, 46); }
+  }
+  font('700 34px Karla, system-ui, sans-serif', brand); g.fillText(`Find yours: ${SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "")}`, X, H - 130);
+  font('28px Karla, system-ui, sans-serif', soft); g.fillText("A starting point, not a label.", X, H - 84);
+  const blob = await new Promise((r) => c.toBlob(r, "image/png"));
+  return new File([blob], flat ? "yada-results.png" : `yada-type-${first}.png`, { type: "image/png" });
+}
+// Feedback goes along unless they tick "Don't include my feedback". The code still carries their answers so it can be tallied.
+const FEELTEXT = { 1: "doesn't feel right at all", 2: "feels partly right", 3: "feels mostly right", 4: "feels spot on" };
+function shareMessage() {
+  const fb = !st.noFeedback, note = st.note.trim();
+  const said = fb && (st.feel || note) ? `\n\nMy feedback: ${st.feel ? `The result ${FEELTEXT[st.feel]}.` : ""}${note ? `${st.feel ? " " : ""}\u201c${note}\u201d` : ""}` : "";
+  const code = resultsCode(fb ? st : { ...st, tname: "", feel: "", note: "" });
+  return `${shareText(shareSummary())}${said}\n\nFind yours: ${SHARE_URL}\n\nResults code for Yada: ${code}`;
+}
+function shareResults(statusId) {
+  const status = document.getElementById(statusId), text = shareMessage();
+  const copy = () => navigator.clipboard.writeText(text)
+    .then(() => { status.textContent = "Copied. Paste it into a text or email."; })
+    .catch(() => { status.textContent = "Couldn't share here. Here's the message:"; status.insertAdjacentHTML("afterend", `<code class="share">${h(text)}</code>`); });
+  if (!navigator.share) return copy();
+  const withPicture = card.file && navigator.canShare?.({ files: [card.file] });
+  const data = withPicture ? { files: [card.file], title: "My Yada results", text } : { title: "My Yada results", text };
+  navigator.share(data).catch((e) => { if (e.name !== "AbortError") copy(); });
+}
+
 function wire() {
   const $ = (s) => document.querySelector(s), on = (s, f) => { const el = $(s); if (el) el.onclick = f; };
+  if ($("#shareresults")) prepareCard();
+  on("#shareresults", () => shareResults("shared"));
+  on("#shareresults2", () => shareResults("copiedresults"));
+  if ($("#nofeedback")) $("#nofeedback").onchange = (e) => set({ noFeedback: e.target.checked });
+  on("#printresults", () => window.print());
   document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => set({ mode: b.dataset.mode }));
   if ($("#about")) $("#about").oninput = (e) => { st.about = e.target.value; save(); };
   if ($("#guess")) $("#guess").onchange = (e) => set({ guess: e.target.value, sure: Number(e.target.value) ? st.sure : "" });
