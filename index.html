@@ -516,7 +516,7 @@ const SHARE_URL = "https://studio2918.github.io/yada/";
 // Web3Forms access key: "Send to the Yada team" emails results to the address this key was made for.
 // Leave it empty to hide the button. The key is meant to be public; it can only send to that one address.
 const FEEDBACK_KEY = "6aa15749-8b17-49e7-aff0-949acd54fe3c";
-const INVITE = `Hey! I'm building an app called Yada and would love your help testing one piece of it. It's a short Enneagram test (about 10 minutes): ${SHARE_URL}
+const INVITE = `Hey! I'm building an app called Yada and would love your help testing one piece of it. It's a short Enneagram test (5–10 minutes): ${SHARE_URL}
 
 When you finish, read through your result, fill in the "Does this sound like you?" box near the end, tap "Share my results," and send it to me. Honest feedback helps the most, especially if the result feels wrong!`;
 let isOwner = false;
@@ -541,7 +541,7 @@ function intro() {
   return `
   <section class="stack">
     <h1>${other() ? `Discover what drives ${h(who())}` : "Discover what drives you"}</h1>
-    <p class="muted">This finder suggests ${other() ? "their" : "your"} likely Enneagram type: the core motives, gifts, and blind spots behind how ${other() ? "they" : "you"} think and react. It takes about 10 minutes, starting with a short read on what the Enneagram is and isn't.</p>
+    <p class="muted">This finder suggests ${other() ? "their" : "your"} likely Enneagram type: the core motives, gifts, and blind spots behind how ${other() ? "they" : "you"} think and react. It takes 5–10 minutes, starting with a short read on what the Enneagram is and isn't.</p>
   </section>
   <div class="panel">
     <span class="eyebrow">How it works</span>
@@ -733,6 +733,12 @@ function result() {
     <div class="row"><button type="button" id="shareresults">Share my results</button><button type="button" class="secondary" id="printresults">Save as PDF or print</button></div>
     <span class="muted small" id="shared" role="status"></span>
     <label class="small" style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="nofeedback" ${st.noFeedback ? "checked" : ""}> Don't include my feedback</label>
+    <div class="stack" style="gap:8px;border-top:1px solid var(--line);padding-top:14px">
+      <h3>Know someone who'd like this?</h3>
+      <p class="small muted">Send them the link so they can find their own type. Your results stay with you.</p>
+      <div class="row"><button type="button" class="secondary" id="invitefriend">Invite someone to take it</button></div>
+      <span class="muted small" id="invited" role="status"></span>
+    </div>
   </div>`}
   <div class="row"><button type="button" class="secondary" id="back">Change my last answer</button><button type="button" class="secondary" id="restart">Start over</button></div>
   <p class="muted small">The Enneagram is a helpful lens, not a scientifically settled category. It describes how someone might be wired. It doesn't tell you their story.</p>
@@ -1056,6 +1062,16 @@ function sendToTeam() {
     btn.disabled = false; btn.textContent = "Send an update"; status.textContent = "Sent. Thank you! If you change anything, you can send an update.";
   }).catch(() => { btn.disabled = false; status.textContent = "Couldn't send just now. Check your connection and try again, or tap Share my results instead."; });
 }
+// Invite someone to take the finder: just the link and a line about it, never the sender's results.
+const FRIEND_INVITE = "I just found out what drives me. Take this and we can compare. It's a 5–10 minute Christ-centered Enneagram test:";
+function inviteFriend() {
+  const status = document.getElementById("invited");
+  const copy = () => navigator.clipboard.writeText(`${FRIEND_INVITE} ${SHARE_URL}`)
+    .then(() => { status.textContent = "Link copied. Paste it into a text or email."; })
+    .catch(() => { status.textContent = "Here's the link to send:"; status.insertAdjacentHTML("afterend", `<code class="share">${h(SHARE_URL)}</code>`); });
+  if (!navigator.share) return copy();
+  navigator.share({ title: "Yada type finder", text: FRIEND_INVITE, url: SHARE_URL }).catch((e) => { if (e.name !== "AbortError") copy(); });
+}
 function shareResults(statusId) {
   const status = document.getElementById(statusId), text = shareMessage();
   let file = null; try { if (window.jspdf?.jsPDF) file = resultsPdf(); } catch {}
@@ -1076,6 +1092,7 @@ function wire() {
   on("#sendteam", sendToTeam);
   if ($("#nofeedback")) $("#nofeedback").onchange = (e) => set({ noFeedback: e.target.checked });
   on("#printresults", () => window.print());
+  on("#invitefriend", inviteFriend);
   on("#tofeedback", () => $("#sendpanel").scrollIntoView({ behavior: "smooth", block: "start" }));
   document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => set({ mode: b.dataset.mode }));
   if ($("#about")) $("#about").oninput = (e) => { st.about = e.target.value; save(); };
