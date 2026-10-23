@@ -84,6 +84,22 @@ textarea { min-height: 70px; font-size: 14px; }
 .bar b { font-family: var(--display); font-size: 18px; font-weight: 400; }
 /* The tester box is a light card in both themes so it stands out from everything else. */
 .printonly { display: none; }
+.contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 560px) { .contrast { grid-template-columns: 1fr; } }
+.cbox { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--bg); }
+.cbox.word { border-color: var(--brand); }
+.chips2 { display: flex; flex-wrap: wrap; gap: 6px; }
+.chipbtn { font-weight: 500; font-size: 14px; padding: 6px 12px; background: transparent; color: var(--ink-soft); border-color: var(--line); }
+.chipbtn[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.relbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.relbtns button { padding: 10px 12px; }
+.typegrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.typegrid .mode { padding: 10px 4px; align-items: center; text-align: center; gap: 0; min-width: 0; }
+.typegrid .mode .small { font-size: 12px; overflow-wrap: anywhere; }
+.typegrid .mode strong { font-size: 22px; }
+.fric { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--bg); }
+.fric summary { cursor: pointer; font-weight: 700; }
+.fric[open] { border-color: var(--brand); }
 .fbbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); pointer-events: none; }
 .fbbar[hidden] { display: none; }
 .fbbar button { pointer-events: auto; box-shadow: 0 6px 24px rgba(0, 0, 0, .3); padding: 12px 20px; max-width: 100%; font-size: 15px; white-space: nowrap; }
@@ -277,143 +293,10 @@ const WINGTEXT = {
 };
 // People in Scripture whose stories show each pattern. We can't know anyone's
 // type for certain, including people in the Bible; these are patterns we can see.
-const BIBLE = {
-  1: { who: "Paul", strengths: "Zeal, conviction, and discipline. He gave everything for what he believed was true.", refsS: "Philippians 3:4–6; 2 Timothy 4:7",
-       struggles: "Before he met Jesus, his zeal turned harsh. He persecuted the church, sure he was right. Later he had a sharp falling-out with Barnabas.", refsW: "Galatians 1:13–14; Acts 15:39",
-       used: "God turned his zeal into grace-filled mission. He carried the gospel across the Roman world and wrote much of the New Testament. “By the grace of God I am what I am.”", refsU: "1 Corinthians 15:10" },
-  2: { who: "Martha", her: true, strengths: "Warm hospitality and practical love. She opened her home to Jesus.", refsS: "Luke 10:38",
-       struggles: "Worried and distracted by serving, and resentful when no one helped: “Lord, do you not care?”", refsW: "Luke 10:40–41",
-       used: "Jesus gently invited her to the one thing that matters. Later she made one of the clearest confessions of faith in the Gospels: “I believe that you are the Christ.”", refsU: "Luke 10:42; John 11:27" },
-  3: { who: "Jacob", strengths: "Determined, resourceful, and persistent. He built a family and a fortune.", refsS: "Genesis 30–31",
-       struggles: "He grasped for the blessing by deceiving his father, striving to get what he thought he had to earn.", refsW: "Genesis 27",
-       used: "God met him at Bethel, wrestled with him through the night, and gave him a new name, Israel. He received a blessing he couldn't earn.", refsU: "Genesis 28:10–15; 32:24–30" },
-  4: { who: "Jeremiah", strengths: "Deep feeling, honesty, and a poet's voice. He stayed faithful to a painful calling.", refsS: "Jeremiah 1",
-       struggles: "Lament that slid into despair. He felt alone and even cursed the day he was born.", refsW: "Jeremiah 20:14–18",
-       used: "God told him, “Before I formed you in the womb I knew you.” Through him God spoke hope in a dark time: the promise of a new covenant written on the heart.", refsU: "Jeremiah 1:5; 31:31–34" },
-  5: { who: "Thomas", strengths: "Honest questions, a need to understand, and quiet courage: “Let us also go, that we may die with him.”", refsS: "John 11:16",
-       struggles: "He held back from believing until he could see for himself, and he wasn't with the others when Jesus first appeared.", refsW: "John 20:24–25",
-       used: "Jesus met him with exactly what he needed. Thomas answered with one of the boldest confessions in Scripture: “My Lord and my God!”", refsU: "John 20:26–28" },
-  6: { who: "Gideon", strengths: "Careful, loyal, and fully committed once he trusted the call.", refsS: "Judges 7",
-       struggles: "Fear and doubt. He was hiding when God found him, and he asked for sign after sign.", refsW: "Judges 6:11, 36–40",
-       used: "God called him a “mighty man of valor” before he was one, then led him and just 300 men to victory.", refsU: "Judges 6:12; 7:7" },
-  7: { who: "Peter", strengths: "Enthusiastic and bold. First to speak, first out of the boat, and the first to say, “You are the Christ.”", refsS: "Matthew 14:28–29; 16:16",
-       struggles: "Impulsive, and quick to avoid pain. He rebuked Jesus for talking about the cross, then denied him under pressure.", refsW: "Matthew 16:22; Luke 22:54–62",
-       used: "Jesus restored him over breakfast by the sea. At Pentecost, Peter preached and about 3,000 people came to faith.", refsU: "John 21:15–19; Acts 2" },
-  8: { who: "Moses", strengths: "A fierce protector. He defended the oppressed, stood up to Pharaoh, and led a nation.", refsS: "Exodus 2:11–17",
-       struggles: "Anger. He killed an Egyptian, shattered the stone tablets, and struck the rock when God told him to speak to it.", refsW: "Exodus 2:12; 32:19; Numbers 20:11–12",
-       used: "His strength was shaped into humility. Scripture calls him very meek, and God spoke with him face to face, as with a friend.", refsU: "Numbers 12:3; Exodus 33:11" },
-  9: { who: "Abraham", strengths: "A peacemaker. He let Lot choose the best land to avoid a quarrel, and welcomed strangers generously.", refsS: "Genesis 13:8–9; 18:1–8",
-       struggles: "Going along to avoid conflict. Twice he passed his wife off as his sister rather than face a powerful king.", refsW: "Genesis 12:10–20; 20",
-       used: "God called him to get up and go. He believed God, and it was counted to him as righteousness. He became the father of faith.", refsU: "Genesis 12:1–3; 15:6" },
-};
-
-// More people with each pattern, shown under "See others". Same shape as BIBLE; her: true for women.
-// Draft content: references only, paraphrased, awaiting the same review as the rest.
-const BIBLE_MORE = {
-  1: [
-    { who: "Ezra", strengths: "Devoted to getting it right. He set his heart to study God's law, live it, and teach it.", refsS: "Ezra 7:10",
-      struggles: "When he saw how far the people had drifted, he was so appalled he tore his clothes and sat stunned until evening.", refsW: "Ezra 9:3–4",
-      used: "God used his care for the truth to renew a people. When he read the law aloud, the people wept, then celebrated.", refsU: "Nehemiah 8:1–12" },
-    { who: "Elijah", strengths: "Uncompromising zeal for God. He stood alone against hundreds of false prophets.", refsS: "1 Kings 18:20–39",
-      struggles: "Right after his greatest victory he burned out, ran, and asked to die, sure he was the only faithful one left.", refsW: "1 Kings 19:3–4, 10",
-      used: "God didn't scold him. He gave him sleep and food, spoke in a gentle whisper, and showed him he wasn't alone.", refsU: "1 Kings 19:5–18" },
-    { who: "John the Baptist", strengths: "Uncompromising integrity. He called everyone to turn back to God, from crowds to kings.", refsS: "Matthew 3:1–12; 14:3–4",
-      struggles: "From prison, when Jesus didn't look like what he expected, he sent to ask if Jesus was really the one.", refsW: "Matthew 11:2–3",
-      used: "Jesus answered him gently with what He was doing, then said no one born of women was greater.", refsU: "Matthew 11:4–11" },
-  ],
-  2: [
-    { who: "Jonathan", strengths: "Generous, loyal love. He gave David his own robe, sword, and bow, and loved him as himself.", refsS: "1 Samuel 18:1–4",
-      struggles: "Caught between his father and his friend, he tried to keep the peace for everyone and paid for it in Saul's anger.", refsW: "1 Samuel 20:30–34",
-      used: "His kindness outlived him. Years later David cared for Jonathan's son because of the covenant between them.", refsU: "2 Samuel 9:1–7" },
-    { who: "Rebekah", her: true, strengths: "Quick, generous hospitality. She watered a stranger's camels without being asked.", refsS: "Genesis 24:18–20",
-      struggles: "Her love for one son turned into managing outcomes. She planned the deception that won Jacob the blessing.", refsW: "Genesis 25:28; 27:5–17",
-      used: "God had already promised what she tried to arrange, and He kept His word through her family anyway.", refsU: "Genesis 25:23; 28:13–15" },
-    { who: "Barnabas", strengths: "The son of encouragement. He sold a field to help others and vouched for Saul when everyone was afraid.", refsS: "Acts 4:36–37; 9:27",
-      struggles: "Wanting to keep everyone close, he went along with others' hypocrisy instead of standing apart.", refsW: "Galatians 2:13",
-      used: "His encouragement opened doors for Paul and later for Mark, and he helped lead the church in Antioch.", refsU: "Acts 11:22–26; 15:39" },
-  ],
-  3: [
-    { who: "Joseph", strengths: "Excellence wherever he landed: in Potiphar's house, in prison, and finally over all of Egypt.", refsS: "Genesis 39:2–4, 22; 41:41",
-      struggles: "As a young man he couldn't resist telling his brothers about dreams where they bowed to him.", refsW: "Genesis 37:5–11",
-      used: "God used his gifts to save many lives. He could tell his brothers that what they meant for evil, God meant for good.", refsU: "Genesis 50:20" },
-    { who: "Solomon", strengths: "Wise, accomplished, and admired. He built the temple and his wisdom drew people from other nations.", refsS: "1 Kings 3:12; 6; 10:1–9",
-      struggles: "He kept adding: more projects, more wealth, more wives. In time his heart turned away from God.", refsW: "1 Kings 11:1–4; Ecclesiastes 2:4–11",
-      used: "His own search taught what achievement can't give, and he pointed back to the one thing that lasts: fear God and keep His commands.", refsU: "Ecclesiastes 12:13" },
-    { who: "Zacchaeus", strengths: "Driven and resourceful. He rose to chief tax collector and wouldn't let a crowd keep him from seeing Jesus.", refsS: "Luke 19:2–4",
-      struggles: "He got ahead by cutting corners and taking more than was fair.", refsW: "Luke 19:7–8",
-      used: "Jesus came to his house first. He gave half of what he had to the poor and repaid those he'd cheated four times over.", refsU: "Luke 19:5–10" },
-  ],
-  4: [
-    { who: "David", strengths: "A poet and musician with deep feeling. Much of the Psalms' honesty comes from him.", refsS: "1 Samuel 16:23; 2 Samuel 23:1",
-      struggles: "Strong desire and strong sorrow. He took what wasn't his, and at times he was flooded with grief.", refsW: "2 Samuel 11; Psalm 6:6",
-      used: "His honest repentance became Psalm 51, and God called him a man after His own heart.", refsU: "Psalm 51; Acts 13:22" },
-    { who: "Hannah", her: true, strengths: "Honest, heartfelt prayer. She poured out her soul before the Lord.", refsS: "1 Samuel 1:10–15",
-      struggles: "Year after year she grieved what she didn't have, weeping and unable to eat.", refsW: "1 Samuel 1:6–8",
-      used: "God heard her and gave her Samuel. Her prayer of thanks became one of Scripture's great songs.", refsU: "1 Samuel 1:20; 2:1–10" },
-    { who: "Naomi", her: true, strengths: "Deep love. Her daughters-in-law clung to her, and Ruth wouldn't leave her.", refsS: "Ruth 1:8–17",
-      struggles: "Grief that turned to bitterness. She told people to call her Mara, meaning bitter.", refsW: "Ruth 1:20–21",
-      used: "God restored what she thought was gone. Her grandson Obed became the grandfather of David.", refsU: "Ruth 4:14–17" },
-  ],
-  5: [
-    { who: "Nicodemus", strengths: "A thoughtful teacher who came to Jesus with real questions.", refsS: "John 3:1–4",
-      struggles: "Cautious. He came at night, and for a long time he stayed on the edges rather than speak up.", refsW: "John 3:2; 7:50–51",
-      used: "When it cost the most, he stepped forward, bringing spices and helping bury Jesus in the open.", refsU: "John 19:38–40" },
-    { who: "Daniel", strengths: "Insight and understanding. He studied, prayed, and saw what others missed.", refsS: "Daniel 1:17, 20; 9:2",
-      struggles: "Some of what he saw overwhelmed him. He was appalled, didn't understand, and lay sick for days.", refsW: "Daniel 8:27",
-      used: "God revealed mysteries through him, and kings trusted his wisdom across a lifetime in exile.", refsU: "Daniel 2:19–23, 48" },
-    { who: "Nathanael", strengths: "Honest and thoughtful. Jesus called him a man with nothing false in him.", refsS: "John 1:47",
-      struggles: "A skeptic at first: can anything good come out of Nazareth?", refsW: "John 1:46",
-      used: "Once he saw for himself, he made a bold confession: you are the Son of God.", refsU: "John 1:48–49" },
-  ],
-  6: [
-    { who: "Timothy", strengths: "Faithful and loyal. Paul said he had no one else like him who cared so genuinely.", refsS: "Philippians 2:20–22",
-      struggles: "Timidity. Paul had to remind him that God's Spirit is not one of fear.", refsW: "1 Corinthians 16:10–11; 2 Timothy 1:7",
-      used: "God trusted him with leading the church in Ephesus, and two letters of Scripture are addressed to him.", refsU: "1 Timothy 1:3" },
-    { who: "Esther", her: true, strengths: "Loyal to her people and wise about when and how to act.", refsS: "Esther 2:10; 5:1–8",
-      struggles: "Fear. At first she hesitated, because going to the king uninvited could cost her life.", refsW: "Esther 4:11",
-      used: "She chose courage for such a time as this, and her people were saved.", refsU: "Esther 4:14–16; 8:3–8" },
-    { who: "Joshua", strengths: "Loyal and faithful. He stayed close to Moses and trusted God when others were afraid.", refsS: "Exodus 33:11; Numbers 14:6–9",
-      struggles: "He needed to hear it again and again: be strong and courageous, do not be afraid.", refsW: "Joshua 1:6–9",
-      used: "God was with him as He had been with Moses, and he led Israel into the promised land.", refsU: "Joshua 1:5; 21:43–45" },
-  ],
-  7: [
-    { who: "John Mark", strengths: "Eager and ready to go. He joined Paul and Barnabas on their first missionary journey.", refsS: "Acts 12:25",
-      struggles: "When the journey got hard, he left and went home, and Paul didn't want to take him again.", refsW: "Acts 13:13; 15:37–38",
-      used: "He came back. Paul later called him very useful, and the Gospel of Mark is traditionally credited to him.", refsU: "2 Timothy 4:11" },
-    { who: "Samson", strengths: "Bold, full of life, and remarkably strong when the Spirit came on him.", refsS: "Judges 14:6; 15:14–15",
-      struggles: "He chased whatever looked good to him, and his impulses led him into Delilah's trap.", refsW: "Judges 14:3; 16:4–21",
-      used: "In the end he prayed, God remembered him, and Scripture lists him among the heroes of faith.", refsU: "Judges 16:28–30; Hebrews 11:32" },
-    { who: "Miriam", her: true, strengths: "Joyful and celebratory. She led the women in dancing with a tambourine after God's rescue at the sea.", refsS: "Exodus 15:20–21",
-      struggles: "Under strain she turned critical and complained against Moses.", refsW: "Numbers 12:1–2",
-      used: "God restored her, and Scripture names her alongside Moses and Aaron as one He sent to lead His people.", refsU: "Numbers 12:13–15; Micah 6:4" },
-  ],
-  8: [
-    { who: "Nehemiah", strengths: "Took charge and got it done. He organized the builders and faced down opposition.", refsS: "Nehemiah 2:17–18; 4:16–18",
-      struggles: "His intensity could boil over. He confronted some offenders by pulling out their hair.", refsW: "Nehemiah 13:25",
-      used: "The walls of Jerusalem went up in 52 days, and even the enemies saw that God had done it.", refsU: "Nehemiah 6:15–16" },
-    { who: "John (son of Zebedee)", strengths: "Bold and zealous. Jesus nicknamed him and his brother Sons of Thunder.", refsS: "Mark 3:17",
-      struggles: "He wanted to call down fire on a village that turned Jesus away, and asked for a seat of power.", refsW: "Luke 9:54; Mark 10:35–37",
-      used: "Jesus trusted him with His own mother, and John became the apostle who wrote most about love.", refsU: "John 19:26–27; 1 John 4:7–8" },
-    { who: "Deborah", her: true, strengths: "A decisive leader. She judged Israel and called Barak to battle.", refsS: "Judges 4:4–7",
-      struggles: "Her strength made others lean on her. Barak wouldn't go into battle unless she went too.", refsW: "Judges 4:8–9",
-      used: "God gave the victory, her song praised Him for it, and the land had peace for forty years.", refsU: "Judges 5:1–31" },
-  ],
-  9: [
-    { who: "Aaron", strengths: "A steady supporter. He spoke for Moses and held up his arms through a long battle.", refsS: "Exodus 4:14–16; 17:12",
-      struggles: "Going along with the crowd. When the people pushed, he made the golden calf.", refsW: "Exodus 32:1–4, 21–24",
-      used: "God made him the first high priest, and gave him the blessing still spoken today: the Lord bless you and keep you.", refsU: "Numbers 6:22–27" },
-    { who: "Isaac", strengths: "Peaceable. When others fought over his wells, he moved on and dug new ones.", refsS: "Genesis 26:17–22",
-      struggles: "Passive in his own home. Favoritism and avoidance left room for deception.", refsW: "Genesis 25:28; 27",
-      used: "God met him and said, I am with you. He carried the promise to the next generation.", refsU: "Genesis 26:24" },
-    { who: "Eli", strengths: "Gentle and patient. He taught young Samuel how to listen for God.", refsS: "1 Samuel 3:8–10",
-      struggles: "Too passive to confront his own sons when they did wrong.", refsW: "1 Samuel 2:22–25; 3:13",
-      used: "Through his guidance Samuel learned to say: speak, Lord, your servant is listening.", refsU: "1 Samuel 3:10, 19–20" },
-  ],
-};
-const person = (b) => `
-      <p><strong>Strengths:</strong> ${h(b.strengths)} <span class="muted small">(${b.refsS})</span></p>
-      <p><strong>Struggles:</strong> ${h(b.struggles)} <span class="muted small">(${b.refsW})</span></p>
-      <p><strong>How God used ${b.her ? "her" : "him"}:</strong> ${h(b.used)} <span class="muted small">(${b.refsU})</span></p>`;
+const CENTER = (t) => [8, 9, 1].includes(t) ? "gut" : [2, 3, 4].includes(t) ? "heart" : "head";
+// DISCIPLESHIP:BEGIN generated from content/discipleship-*.txt in the private repo by build_content.py. Edit the text files, not this.
+const DISC = {"intro": {"title": "More than a personality type", "paras": ["Your personality may help explain how you think, respond, connect, and approach life. It does not define your identity, excuse your sin, or determine who you can become.", "The world may encourage us to make our desires, feelings, strengths, and fears the measure of what is right. Jesus calls us to something greater: deny ourselves, follow Him, and be transformed.", "The Enneagram is one imperfect tool for self-reflection, not a biblical classification or spiritual authority. You may recognize some patterns and not others.", "Personality may explain your tendencies, but it never excuses your sin. Scripture defines the standard, Christ establishes the believer’s identity, and the Holy Spirit transforms our character.", "Throughout these pages, “what the world may tell you” describes a temptation toward self-centered thinking, not a claim about what everyone outside the Christian faith believes.", "The goal is not to become a better version of your Enneagram type. It is to become more like Christ."], "refs": "Romans 12:2 · Luke 9:23 · Galatians 5:22–23"}, "types": {"1": {"n": 1, "name": "Reformer", "longs": "Integrity, order, and confidence that things are being done rightly.", "fear": "Being wrong, irresponsible, careless, or unjustly blamed.", "care": "Keeping commitments, noticing problems, and improving what needs attention.", "brings": "Faithfulness, diligence, consistency, and a strong commitment to doing what is right.", "blind": "Allowing high standards to become criticism, pride, resentment, or self-righteousness.", "conflict": "Focus on what went wrong, suppress frustration, or become overly critical.", "helps": "Honest appreciation, respectful communication, and opportunities to distinguish important convictions from personal preferences.", "stress": "Disorder, carelessness, inconsistency, and neglected responsibilities.", "supported": "Clear expectations, fairness, and grace when mistakes occur.", "decides": "Principles, standards, and a desire to act correctly.", "feedback": "Specific, truthful, and respectful correction can be helpful. A desire for excellence must not become resistance to correction.", "leads": "Establishing standards, modeling diligence, and creating dependable systems.", "values": "Integrity, responsibility, careful work, and consistency.", "fromLeader": "Clear expectations, fair treatment, and principled decisions.", "world": "If you do everything correctly, you will be good enough. Your standards make you right, and people should meet them.", "scripture": {"text": "Righteousness before God cannot be earned through personal perfection. Christ calls believers to pursue holiness with humility, mercy, and dependence on His grace.", "refs": "Philippians 3:8–9 · Micah 6:8"}, "grow": "Practice righteousness without self-righteousness. Correct with gentleness, admit your own failures, and remember that people are more important than your preferences.", "heart": "Am I defending God’s truth, or am I elevating my own standards above others?", "marriage": [{"title": "Correction instead of encouragement", "what": "You may notice mistakes more readily than faithful effort. Your spouse can begin to feel evaluated rather than loved.", "underneath": "Fear of carelessness or things going wrong.", "response": "Distinguish sin from preference. Express appreciation, correct gently when necessary, and examine your own heart first.", "extra": [], "prayer": "Lord, make me humble and gentle in truth.", "refs": "Matthew 7:3–5 · Ephesians 4:29"}, {"title": "Unspoken resentment", "what": "You may suppress frustration until it emerges as criticism or anger.", "underneath": "Fear that admitting anger means losing control or failing morally.", "response": "Speak truthfully and promptly, without allowing anger to become destructive.", "extra": [], "prayer": "Search my heart, Lord. Help me speak truth in love.", "refs": "Psalm 139:23–24 · Ephesians 4:26"}], "parentGood": ["You can teach children integrity and responsibility.", "Your consistency can help them learn trust.", "Your diligence can model faithfulness in ordinary things."], "parentHard": [{"title": "Correcting more than encouraging", "what": "Children may feel that their failures receive more attention than their growth.", "underneath": null, "response": "Correct patiently, celebrate faithfulness, and never confuse a child’s performance with their worth.", "extra": [], "prayer": "Lord, help me raise my children without provoking them.", "refs": "Ephesians 6:4"}, {"title": "Making mistakes feel unsafe", "what": "Children may hide mistakes if every error receives a harsh response.", "underneath": null, "response": "Teach responsibility while modeling confession, forgiveness, and mercy.", "extra": [], "prayer": "As You have shown me mercy, help me show mercy.", "refs": "Colossians 3:12–13"}], "leaderGood": ["You can establish clear and fair standards.", "You can model honesty and accountability.", "You can develop dependable systems and processes."], "leaderHard": [{"title": "Micromanaging", "what": "Your preference for doing things correctly can prevent others from learning or exercising judgment.", "underneath": null, "response": "Establish clear expectations, provide training, and allow appropriate freedom without abandoning accountability.", "extra": [], "prayer": "Give me wisdom to lead without pride.", "refs": "Philippians 2:3–4"}, {"title": "Criticism over encouragement", "what": "Continual correction can discourage people and make them afraid to take initiative.", "underneath": null, "response": "Speak truthfully while deliberately building others up.", "extra": [], "prayer": "Let my words strengthen those I lead.", "refs": "Ephesians 4:29"}], "lives": [{"who": "Paul", "sub": "Zeal transformed by grace", "text": "Scripture records Paul’s intense zeal, his persecution of the church before conversion, and his later ministry as an apostle of Christ. His former persecution was serious sin, not merely excessive perfectionism.", "lesson": "Sincerity and conviction do not make us righteous. We need the grace and truth of Jesus Christ.", "refs": "Galatians 1:13–16 · 1 Corinthians 15:9–10"}, {"who": "Ezra", "sub": "Devotion to God’s Word", "text": "Ezra devoted himself to studying, practicing, and teaching God’s law. His grief over Israel’s disobedience reflects the seriousness of covenant unfaithfulness, not necessarily an unhealthy need for perfection.", "lesson": "God’s truth should shape our lives before we teach or correct others.", "refs": "Ezra 7:10 · Ezra 9:3–6"}, {"who": "Elijah", "sub": "Faithfulness amid exhaustion", "text": "Elijah confronted idolatry courageously, yet later experienced fear, exhaustion, and deep despair. God provided physical care and corrected Elijah’s belief that he was alone.", "lesson": "Faithful servants can experience profound weakness. God’s compassion and truth meet us there.", "refs": "1 Kings 18–19"}, {"who": "John the Baptist", "sub": "Conviction and humility", "text": "John called people to repentance, confronted wrongdoing, and pointed beyond himself to Jesus. While imprisoned, he sent messengers to ask Jesus whether He was the promised One.", "lesson": "Faithfulness includes courage, humility, and bringing our questions to Christ.", "refs": "Matthew 3:1–12 · Matthew 11:2–11 · John 3:30"}]}, "2": {"n": 2, "name": "Helper", "longs": "Close relationships, affection, appreciation, and opportunities to care for others.", "fear": "Being unwanted, rejected, or valued only for usefulness.", "care": "Noticing needs, offering practical help, and expressing affection.", "brings": "Warmth, generosity, attentiveness, and relational care.", "blind": "Seeking approval through service, neglecting personal responsibility, or expecting unspoken repayment.", "conflict": "Minimize personal concerns, avoid direct requests, or become resentful when sacrifices go unnoticed.", "helps": "Honest appreciation and encouragement to communicate needs directly.", "stress": "Feeling excluded, unappreciated, or relationally disconnected.", "supported": "Sincere affection, mutual care, and honest communication.", "decides": "The anticipated effect on people and relationships.", "feedback": "Kind, direct correction that does not confuse accountability with rejection.", "leads": "Building relationships, encouraging people, and responding to needs.", "values": "Cooperation, kindness, appreciation, and mutual support.", "fromLeader": "Respect, personal recognition, and honest communication.", "world": "You are valuable because people need you. Keep giving, and others will owe you affection.", "scripture": {"text": "Love is not a transaction. Christ loved us before we could repay Him, and believers are called to love sincerely without selfish ambition.", "refs": "1 John 4:19 · Philippians 2:3–4"}, "grow": "Serve from love rather than a need for approval. Speak truthfully about your needs, accept appropriate limits, and resist using generosity to influence or control others.", "heart": "Am I serving because I love this person, or because I need their approval?", "marriage": [{"title": "Giving while keeping score", "what": "You may serve generously while secretly expecting recognition or repayment.", "underneath": "Fear of being unimportant or unloved.", "response": "Give sincerely, communicate needs honestly, and refuse to use past sacrifices as leverage.", "extra": [], "prayer": "Lord, teach me to love without keeping score.", "refs": "1 Corinthians 13:4–5"}, {"title": "Hinting instead of asking", "what": "You may hope your spouse recognizes needs you have not expressed.", "underneath": "Fear of rejection or appearing burdensome.", "response": "Speak plainly, listen to your spouse, and make requests without manipulation.", "extra": [], "prayer": "Help me speak truthfully and lovingly.", "refs": "Ephesians 4:15, 25"}], "parentGood": ["You can create a caring and welcoming home.", "You can model generosity and compassion.", "You can help children recognize the needs of others."], "parentHard": [{"title": "Over-helping", "what": "Doing everything for children can prevent them from learning responsibility.", "underneath": null, "response": "Offer support while allowing age-appropriate independence and growth.", "extra": [], "prayer": "Give me wisdom to nurture without controlling.", "refs": "Ephesians 6:4"}, {"title": "Needing to be needed", "what": "A child’s growing independence may feel like personal rejection.", "underneath": null, "response": "Celebrate their growth. Children are entrusted to your care, not given to satisfy your emotional needs.", "extra": [], "prayer": "Teach me to steward the children You have entrusted to me.", "refs": "Psalm 127:3"}], "leaderGood": ["You can cultivate a caring team culture.", "You can recognize individual needs.", "You can encourage and develop people."], "leaderHard": [{"title": "Avoiding necessary correction", "what": "Wanting approval can keep you from confronting harmful or irresponsible behavior.", "underneath": null, "response": "Speak truth in love, remembering that accountability can be an expression of care.", "extra": [], "prayer": "Give me courage to speak truth with love.", "refs": "Ephesians 4:15"}, {"title": "Rescuing instead of developing", "what": "Repeatedly taking over others’ responsibilities can prevent growth and create unfairness.", "underneath": null, "response": "Bear appropriate burdens together while respecting personal responsibility.", "extra": [], "prayer": "Teach me when to help and when to equip.", "refs": "Galatians 6:2, 5"}], "lives": [{"who": "Martha", "sub": "Service and devotion", "text": "Martha welcomed Jesus into her home and was distracted by much serving. Jesus redirected her attention toward what mattered most. Later, she made a profound confession of faith.", "lesson": "Serving is good, but activity must never displace devotion to Christ.", "refs": "Luke 10:38–42 · John 11:27"}, {"who": "Jonathan", "sub": "Loyal and courageous love", "text": "Jonathan loved David, supported him, and opposed Saul’s unjust treatment of him, even at personal cost.", "lesson": "Genuine love is generous and courageous. It does not require compromising truth to preserve approval.", "refs": "1 Samuel 18:1–4 · 20:30–34"}, {"who": "Rebekah", "sub": "Generosity and deception", "text": "Rebekah demonstrated remarkable hospitality. Later, she participated in deceiving Isaac to secure Jacob’s blessing.", "lesson": "Good intentions or concern for loved ones do not justify dishonest methods.", "refs": "Genesis 24:18–20 · 27:5–17"}, {"who": "Barnabas", "sub": "Encouragement with accountability", "text": "Barnabas generously supported believers and encouraged Paul and Mark. Scripture also records that he was drawn into hypocrisy at Antioch.", "lesson": "Encouragement is a gift, but love must remain faithful to truth.", "refs": "Acts 4:36–37 · 9:27 · Galatians 2:13"}]}, "3": {"n": 3, "name": "Achiever", "longs": "Purpose, effectiveness, accomplishment, and meaningful recognition.", "fear": "Failure, insignificance, or being valued only for achievements.", "care": "Providing, organizing, solving problems, and accomplishing goals.", "brings": "Initiative, vision, diligence, and practical support.", "blind": "Allowing ambition, image, or productivity to take priority over honesty and relationships.", "conflict": "Focus on solutions, defend performance, or try to resolve matters too quickly.", "helps": "Honest connection that is not centered on accomplishments.", "stress": "Failure, inefficiency, public embarrassment, and loss of momentum.", "supported": "Clear goals, genuine affection, and recognition of character as well as effort.", "decides": "Effectiveness, measurable outcomes, and practical results.", "feedback": "Direct, truthful correction that emphasizes integrity rather than appearances.", "leads": "Establishing goals, communicating vision, and encouraging achievement.", "values": "Initiative, competence, productivity, and growth.", "fromLeader": "Clear priorities, fair recognition, and opportunities to develop.", "world": "Your achievements establish your worth. Success proves you matter.", "scripture": {"text": "Accomplishments cannot establish righteousness before God. Believers are saved by grace through faith and created in Christ for good works, not saved by those works.", "refs": "Ephesians 2:8–10 · Philippians 3:7–9"}, "grow": "Pursue excellence without worshiping success. Tell the truth when you fail, value people above outcomes, and practice faithfulness when no one notices.", "heart": "Would I still obey Christ if obedience cost me success or recognition?", "marriage": [{"title": "Productivity instead of presence", "what": "You may express love by accomplishing things while neglecting emotional and relational connection.", "underneath": "A belief that usefulness establishes personal value.", "response": "Give your spouse attention that is not earned through productivity.", "extra": [], "prayer": "Lord, teach me to love through presence and service.", "refs": "Philippians 2:3–4"}, {"title": "Protecting appearances", "what": "You may minimize problems because admitting failure threatens your image.", "underneath": "Fear of shame or rejection.", "response": "Confess wrongdoing honestly and pursue genuine change rather than managing impressions.", "extra": [], "prayer": "Give me courage to walk in truth.", "refs": "Proverbs 28:13 · Ephesians 4:25"}], "parentGood": ["You can model diligence and perseverance.", "You can encourage children to develop their gifts.", "You can help children pursue meaningful goals."], "parentHard": [{"title": "Performance-based approval", "what": "Children may begin to associate your affection with achievement.", "underneath": null, "response": "Express love consistently, celebrate character, and teach that success does not determine human worth.", "extra": [], "prayer": "Help me love my children without measuring their achievements.", "refs": "Mark 10:13–16"}, {"title": "Too busy to be present", "what": "Your goals may crowd out relationships.", "underneath": null, "response": "Give children unhurried attention and model faithful stewardship of time.", "extra": [], "prayer": "Teach me to number my days wisely.", "refs": "Psalm 90:12"}], "leaderGood": ["You can establish compelling goals.", "You can recognize and develop talent.", "You can create momentum and encourage excellence."], "leaderHard": [{"title": "Treating people as instruments", "what": "Employees may become tools for achieving your goals.", "underneath": null, "response": "Remember that people bear God’s image and deserve dignity independent of their productivity.", "extra": [], "prayer": "Help me value people above my ambitions.", "refs": "Genesis 1:27 · Philippians 2:3–4"}, {"title": "Image over honesty", "what": "You may hide failures or delay acknowledging problems.", "underneath": null, "response": "Lead with transparency, accept responsibility, and correct mistakes promptly.", "extra": [], "prayer": "Make integrity more important to me than appearances.", "refs": "Proverbs 11:3"}], "lives": [{"who": "Jacob", "sub": "Striving and grace", "text": "Jacob used deception to obtain Isaac’s blessing. God nevertheless continued His covenant purposes through Jacob and later renamed him Israel.", "lesson": "God’s promises are not secured through dishonest striving.", "refs": "Genesis 27 · 28:10–15 · 32:24–30"}, {"who": "Joseph", "sub": "Faithfulness in responsibility", "text": "Joseph served faithfully through slavery, imprisonment, and leadership in Egypt. God used his circumstances to preserve many lives.", "lesson": "Excellence can honor God when practiced with integrity, humility, and trust in His providence.", "refs": "Genesis 39 · 41 · 50:20"}, {"who": "Solomon", "sub": "Wisdom and divided devotion", "text": "Solomon received extraordinary wisdom and built the temple. Yet his accumulation of wives and his later idolatry revealed the danger of turning away from God.", "lesson": "Accomplishment and wisdom do not replace wholehearted obedience.", "refs": "1 Kings 3 · 6 · 11:1–13"}, {"who": "Zacchaeus", "sub": "Repentance demonstrated", "text": "Zacchaeus was a wealthy chief tax collector. After Jesus came to his home, he pledged generosity and restitution for any fraud he had committed.", "lesson": "Genuine repentance affects how we handle money, power, and responsibility.", "refs": "Luke 19:1–10"}]}, "4": {"n": 4, "name": "Individualist", "longs": "Meaning, authenticity, connection, and being deeply understood.", "fear": "Insignificance, rejection, or being misunderstood.", "care": "Emotional attentiveness, creativity, and remembering personal details.", "brings": "Empathy, emotional honesty, depth, and creativity.", "blind": "Allowing comparison, dissatisfaction, or intense emotions to govern responses.", "conflict": "Feel misunderstood, withdraw, or intensify emotional expression.", "helps": "Patient listening combined with honest and grounded communication.", "stress": "Dismissal, superficiality, emotional disconnection, and comparison.", "supported": "Sincere attention, meaningful connection, and respectful communication.", "decides": "Personal significance, values, and emotional resonance.", "feedback": "Honest and compassionate correction that distinguishes feelings from facts.", "leads": "Communicating meaning, creativity, and personal conviction.", "values": "Authenticity, creativity, depth, and purposeful work.", "fromLeader": "Thoughtful feedback and meaningful opportunities to contribute.", "world": "Your feelings define your truth. Being authentic means following whatever feels most deeply like you.", "scripture": {"text": "Our emotions deserve honest attention, but they are not the final authority for truth. God calls believers to examine their hearts and bring their thoughts and desires before Him.", "refs": "Psalm 139:23–24 · Romans 12:2"}, "grow": "Practice gratitude, discernment, emotional self-control, and faithfulness. Allow God’s truth to guide your responses without denying genuine sorrow.", "heart": "Am I bringing my feelings before God, or allowing them to determine what is true?", "marriage": [{"title": "Feeling misunderstood", "what": "You may withdraw or intensify a conversation when you do not feel fully understood.", "underneath": "A deep desire to be known and accepted.", "response": "Communicate honestly, listen in return, and resist making perfect emotional understanding a condition of love.", "extra": [], "prayer": "Lord, help me love patiently and truthfully.", "refs": "1 Corinthians 13:4–7"}, {"title": "Focusing on what is missing", "what": "Comparison or dissatisfaction may overshadow genuine blessings.", "underneath": "Longing for deeper connection or meaning.", "response": "Practice gratitude while addressing legitimate concerns honestly.", "extra": [], "prayer": "Teach me contentment without complacency.", "refs": "Philippians 4:11–13"}], "parentGood": ["You can help children recognize and express emotions honestly.", "You can nurture creativity and individuality.", "You can demonstrate empathy during difficult experiences."], "parentHard": [{"title": "Emotions that dominate the home", "what": "Children may begin to feel responsible for managing your moods.", "underneath": null, "response": "Practice self-control and make clear that children are not responsible for regulating a parent’s emotions.", "extra": [], "prayer": "Grow gentleness and self-control in me.", "refs": "Galatians 5:22–23"}, {"title": "Withdrawing when hurt", "what": "Emotional withdrawal can leave children feeling disconnected.", "underneath": null, "response": "Take appropriate time to regain composure, then return with warmth and honest communication.", "extra": [], "prayer": "Help me remain faithful and present.", "refs": "Colossians 3:12–13"}], "leaderGood": ["You can bring meaning and creativity to work.", "You can recognize the human experience behind performance.", "You can encourage authenticity and thoughtful expression."], "leaderHard": [{"title": "Mood-driven leadership", "what": "Your emotional state may create uncertainty for others.", "underneath": null, "response": "Practice steadiness, self-control, and fair treatment regardless of your mood.", "extra": [], "prayer": "Help me lead with wisdom and self-control.", "refs": "Galatians 5:22–23"}, {"title": "Taking feedback personally", "what": "Criticism of your work may feel like rejection of your identity.", "underneath": null, "response": "Receive correction humbly and separate personal worth from performance.", "extra": [], "prayer": "Give me a teachable heart.", "refs": "Proverbs 12:1"}], "lives": [{"who": "Jeremiah", "sub": "Faithfulness through sorrow", "text": "Jeremiah faithfully proclaimed God’s message while experiencing rejection and deep anguish. His lamentations reveal the reality of suffering in faithful service.", "lesson": "Honest lament and obedience can coexist. Pain does not mean God has abandoned His servant.", "refs": "Jeremiah 1 · 20:7–18 · 31:31–34"}, {"who": "David", "sub": "Worship, sin, and repentance", "text": "David expressed profound joy and sorrow in the Psalms. He also committed grave sins against Bathsheba and Uriah and was confronted by Nathan.", "lesson": "Emotional depth does not excuse sin. God calls us to honest confession and repentance.", "refs": "2 Samuel 11–12 · Psalm 51"}, {"who": "Hannah", "sub": "Sorrow brought before God", "text": "Hannah suffered deeply because of infertility and mistreatment. She brought her grief to God in prayer.", "lesson": "Suffering is not a personality defect. God welcomes honest prayer from those who are hurting.", "refs": "1 Samuel 1:6–20"}, {"who": "Naomi", "sub": "Grief and providence", "text": "Naomi endured the deaths of her husband and sons and openly expressed bitterness over her suffering. God’s providence unfolded through Ruth and Boaz.", "lesson": "God’s faithfulness is not limited by what we can understand in seasons of loss.", "refs": "Ruth 1 · 4:13–17"}]}, "5": {"n": 5, "name": "Investigator", "longs": "Understanding, competence, privacy, and time to think.", "fear": "Being overwhelmed, unprepared, or incapable.", "care": "Offering thoughtful insight, practical assistance, and careful attention.", "brings": "Stability, thoughtful decisions, loyalty, and calm reflection.", "blind": "Using distance, analysis, or independence to avoid relational responsibility.", "conflict": "Withdraw to process information or respond with analysis before acknowledging emotions.", "helps": "Clear communication and reasonable processing time, followed by a commitment to reengage.", "stress": "Excessive demands, uncertainty, interruptions, and emotional pressure.", "supported": "Respectful boundaries, clear expectations, and thoughtful dialogue.", "decides": "Research, careful analysis, and available evidence.", "feedback": "Specific correction with an opportunity to reflect and respond.", "leads": "Expertise, preparation, and independent judgment.", "values": "Competence, thoughtfulness, preparation, and autonomy.", "fromLeader": "Clear information, appropriate independence, and reasonable expectations.", "world": "If you know enough and remain independent, you won’t need anyone. Knowledge and self-sufficiency will keep you secure.", "scripture": {"text": "Knowledge is valuable, but it must be governed by humility and love. Believers are called to use their gifts in service to others.", "refs": "1 Corinthians 8:1 · 1 Peter 4:10"}, "grow": "Let understanding lead to obedience and love. Practice generosity with your time, attention, and knowledge.", "heart": "Am I using knowledge to serve others, or to avoid depending on and loving them?", "marriage": [{"title": "Withdrawing to recharge", "what": "Solitude may be helpful, but unexplained withdrawal can leave your spouse feeling abandoned.", "underneath": "Concern about emotional or mental overload.", "response": "Communicate your need for time, agree to return, and follow through.", "extra": [], "prayer": "Lord, help me love faithfully through my presence.", "refs": "Philippians 2:4"}, {"title": "Analyzing instead of listening", "what": "You may try to solve an emotional concern before understanding it.", "underneath": "A preference for clarity and manageable problems.", "response": "Listen first, show compassion, and offer solutions when appropriate.", "extra": [], "prayer": "Make me quick to listen and slow to speak.", "refs": "James 1:19 · Romans 12:15"}], "parentGood": ["You can nurture curiosity and learning.", "You can model careful thinking.", "You can encourage children to develop sound judgment."], "parentHard": [{"title": "Being mentally absent", "what": "Children may experience you as unavailable even when you are physically nearby.", "underneath": null, "response": "Offer intentional attention and engage with their interests.", "extra": [], "prayer": "Help me be attentive to those entrusted to my care.", "refs": "Philippians 2:4"}, {"title": "Withholding affection", "what": "Children may struggle to recognize love that is rarely expressed.", "underneath": null, "response": "Demonstrate affection through appropriate words, attention, and action.", "extra": [], "prayer": "Teach me to love in deed and truth.", "refs": "1 John 3:18"}], "leaderGood": ["You can make informed decisions.", "You can remain composed under pressure.", "You can encourage independent thinking."], "leaderHard": [{"title": "Remaining distant", "what": "Your team may lack direction or encouragement because you prefer independent work.", "underneath": null, "response": "Make yourself appropriately available and communicate expectations clearly.", "extra": [], "prayer": "Help me use my gifts to serve others.", "refs": "1 Peter 4:10"}, {"title": "Withholding information", "what": "Waiting for perfect understanding may leave others unable to act.", "underneath": null, "response": "Share relevant information honestly, including what remains uncertain.", "extra": [], "prayer": "Give me wisdom to communicate truthfully.", "refs": "Ephesians 4:25"}], "lives": [{"who": "Thomas", "sub": "Questions and faith", "text": "Thomas expressed willingness to follow Jesus into danger. After the resurrection, he initially refused to believe the other disciples’ testimony without seeing Jesus himself.", "lesson": "Honest questions can be brought to Christ, but faith must ultimately respond to His truth.", "refs": "John 11:16 · 20:24–29"}, {"who": "Nicodemus", "sub": "Seeking understanding", "text": "Nicodemus came to Jesus with questions, later spoke in favor of fair treatment, and participated in Jesus’ burial.", "lesson": "Understanding God’s truth should lead toward courageous action.", "refs": "John 3:1–21 · 7:50–51 · 19:39–40"}, {"who": "Daniel", "sub": "Wisdom and faithfulness", "text": "Daniel demonstrated wisdom, prayerfulness, and integrity in exile. Some divine revelations left him physically overwhelmed.", "lesson": "Wisdom comes from God, and faithfulness matters even when circumstances exceed our understanding.", "refs": "Daniel 1:17–20 · 6 · 8:27"}, {"who": "Nathanael", "sub": "Honest skepticism", "text": "Nathanael questioned whether anything good could come from Nazareth. After meeting Jesus, he confessed Him as the Son of God.", "lesson": "Initial assumptions should be surrendered when confronted with truth.", "refs": "John 1:43–51"}]}, "6": {"n": 6, "name": "Loyalist", "longs": "Security, reliability, belonging, and trustworthy relationships.", "fear": "Betrayal, abandonment, uncertainty, or being unprepared.", "care": "Preparing carefully, remaining loyal, and following through.", "brings": "Commitment, responsibility, attentiveness, and dependability.", "blind": "Allowing fear to produce suspicion, excessive reassurance-seeking, or hesitation.", "conflict": "Ask repeated questions, anticipate negative outcomes, or struggle with uncertainty.", "helps": "Honest communication, consistent behavior, and respectful attention to legitimate concerns.", "stress": "Broken promises, uncertainty, contradictory information, and unexpected changes.", "supported": "Truthfulness, reliability, clarity, and appropriate reassurance.", "decides": "Assessing risks, gathering information, and seeking wise counsel.", "feedback": "Clear, consistent correction that distinguishes facts from assumptions.", "leads": "Preparation, loyalty, responsibility, and risk awareness.", "values": "Honesty, dependability, cooperation, and commitment.", "fromLeader": "Consistency, clear expectations, and trustworthy conduct.", "world": "You must eliminate uncertainty to be safe. If you anticipate every danger, you can prevent every disappointment.", "scripture": {"text": "God calls His people to trust Him while acting with wisdom. Faith does not remove all uncertainty, and prudence is not the same as fear-driven control.", "refs": "Matthew 6:25–34 · Proverbs 3:5–6"}, "grow": "Practice courage, discernment, and faithfulness. Distinguish evidence from imagination, and refuse to let fear govern every decision.", "heart": "Am I responding to what is true, or allowing fear to decide for me?", "marriage": [{"title": "Worry and worst-case thinking", "what": "Repeatedly anticipating danger may burden your spouse or overshadow genuine blessings.", "underneath": "Desire to protect yourself and your family.", "response": "Prepare wisely, communicate concerns honestly, and entrust what you cannot control to God.", "extra": [], "prayer": "Lord, give me wisdom for today and trust for tomorrow.", "refs": "Matthew 6:34"}, {"title": "Suspicion and broken trust", "what": "Fear may lead to repeated questioning or assumptions about motives.", "underneath": "Fear of betrayal or abandonment.", "response": "Distinguish actual wrongdoing from imagined threats. Avoid false accusations and seek truth with humility.", "extra": ["When trust has genuinely been broken, rebuilding it requires honesty, repentance, and consistent changed behavior from the person responsible. Forgiveness does not require immediate trust."], "prayer": "Lord, guide me in truth, wisdom, and courage.", "refs": "Ephesians 4:25 · James 1:5"}], "parentGood": ["You can model loyalty and dependability.", "You can teach children preparation and responsibility.", "You can advocate for their safety and well-being."], "parentHard": [{"title": "Passing along fear", "what": "Children may absorb excessive anxiety about ordinary uncertainties.", "underneath": null, "response": "Teach wise caution alongside courage and trust in God.", "extra": [], "prayer": "Help me teach wisdom without cultivating fear.", "refs": "Proverbs 3:5–6"}, {"title": "Overprotecting", "what": "Attempting to prevent every difficulty can limit opportunities for growth.", "underneath": null, "response": "Provide age-appropriate guidance while allowing children to develop responsibility.", "extra": [], "prayer": "Give me wisdom to prepare and release them appropriately.", "refs": "Ephesians 6:4"}], "leaderGood": ["You can recognize risks early.", "You can build dependable systems.", "You can demonstrate loyalty and responsibility."], "leaderHard": [{"title": "Delaying decisions", "what": "Seeking complete certainty may prevent necessary action.", "underneath": null, "response": "Gather appropriate counsel, make responsible decisions, and accept that perfect certainty is rarely possible.", "extra": [], "prayer": "Lord, give me wisdom to act faithfully.", "refs": "James 1:5 · Proverbs 15:22"}, {"title": "Assuming the worst", "what": "Excessive suspicion can discourage creativity and damage trust.", "underneath": null, "response": "Evaluate ideas fairly, distinguish real risks from imagined ones, and judge others honestly.", "extra": [], "prayer": "Teach me discernment without fear-driven suspicion.", "refs": "Proverbs 18:13"}], "lives": [{"who": "Gideon", "sub": "Fear and obedience", "text": "Gideon expressed uncertainty and requested signs before leading Israel. God patiently directed him, though Gideon’s later actions also reveal serious failures.", "lesson": "God can work through fearful people, but obedience requires more than temporary courage.", "refs": "Judges 6–8"}, {"who": "Timothy", "sub": "Faithful service", "text": "Paul praised Timothy’s genuine concern for others and encouraged him toward courage and faithful ministry.", "lesson": "Faithful service requires perseverance and reliance on God’s power rather than fear.", "refs": "Philippians 2:19–22 · 2 Timothy 1:6–8"}, {"who": "Esther", "sub": "Courage amid real danger", "text": "Esther faced a genuine threat when approaching the king without invitation. She chose to act for her people despite the risk.", "lesson": "Courage does not require the absence of fear; it requires faithful action when obedience is costly.", "refs": "Esther 4:10–16"}, {"who": "Joshua", "sub": "Strength and obedience", "text": "Joshua served faithfully alongside Moses and later led Israel. God repeatedly commanded him to be strong and courageous.", "lesson": "Courage is grounded in God’s faithfulness and expressed through obedience to His Word.", "refs": "Numbers 14:6–9 · Joshua 1:6–9"}]}, "7": {"n": 7, "name": "Enthusiast", "longs": "Joy, freedom, possibility, variety, and meaningful experiences.", "fear": "Restriction, prolonged pain, missed opportunities, or being trapped.", "care": "Encouraging others, bringing energy, creating experiences, and offering optimism.", "brings": "Joy, creativity, adventure, and hopeful perspective.", "blind": "Escaping discomfort, neglecting commitments, or moving forward without addressing consequences.", "conflict": "Reframe problems positively, joke, redirect attention, or seek quick resolution.", "helps": "Honest communication that encourages perseverance rather than avoidance.", "stress": "Restriction, repetitive demands, disappointment, and prolonged uncertainty.", "supported": "Shared enjoyment, meaningful freedom, and honest partnership through difficulty.", "decides": "Possibilities, opportunities, enthusiasm, and quick judgment.", "feedback": "Truthful, direct correction that does not allow optimism to replace accountability.", "leads": "Generating ideas, encouraging people, and recognizing opportunities.", "values": "Creativity, initiative, enthusiasm, and adaptability.", "fromLeader": "Clear priorities, appropriate freedom, and opportunities to contribute ideas.", "world": "Your happiness comes first. Avoid what hurts, pursue what excites you, and don’t let commitments limit your freedom.", "scripture": {"text": "Jesus calls His followers to deny themselves, remain faithful, and find joy in Him rather than in favorable circumstances.", "refs": "Luke 9:23 · John 15:9–11 · James 1:2–4"}, "grow": "Practice perseverance, contentment, self-control, and faithfulness. Learn to remain present when love requires sacrifice.", "heart": "Am I pursuing joy in Christ, or using pleasure and distraction to avoid obedience?", "marriage": [{"title": "Avoiding difficult conversations", "what": "You may use humor, optimism, or distraction to escape uncomfortable discussions.", "underneath": "Fear of emotional pain or prolonged conflict.", "response": "Listen patiently, acknowledge wrongdoing, and remain present until the issue receives appropriate attention.", "extra": [], "prayer": "Lord, give me courage to remain faithful in difficulty.", "refs": "James 1:19 · Philippians 2:4"}, {"title": "Always pursuing the next thing", "what": "New plans may crowd out meaningful connection and unfinished responsibilities.", "underneath": "Fear of missing out or feeling confined.", "response": "Practice contentment and give your spouse your attention without constantly seeking the next experience.", "extra": [], "prayer": "Teach me contentment and faithfulness today.", "refs": "Philippians 4:11–13"}], "parentGood": ["You can nurture joy, wonder, and gratitude.", "You can encourage creativity and exploration.", "You can help children see possibilities and approach challenges with hope."], "parentHard": [{"title": "Rushing past sadness", "what": "Children may feel pressured to become happy before their emotions have been heard.", "underneath": null, "response": "Listen compassionately and allow space for grief without abandoning hope.", "extra": [], "prayer": "Teach me to weep with those who weep.", "refs": "Romans 12:15 · John 11:35"}, {"title": "Inconsistent follow-through", "what": "Excitement about new experiences may interfere with promises and routines.", "underneath": null, "response": "Keep commitments and model perseverance in ordinary responsibilities.", "extra": [], "prayer": "Grow faithfulness and self-control in me.", "refs": "Galatians 5:22–23"}], "leaderGood": ["You can inspire optimism and initiative.", "You can identify opportunities.", "You can cultivate creativity and energy."], "leaderHard": [{"title": "Too many unfinished ideas", "what": "Frequent changes can create confusion, wasted effort, and instability.", "underneath": null, "response": "Count the cost, establish priorities, and finish what you responsibly commit to doing.", "extra": [], "prayer": "Teach me to plan wisely and follow through.", "refs": "Luke 14:28–30"}, {"title": "Avoiding hard conversations", "what": "You may postpone correction to preserve an upbeat atmosphere.", "underneath": null, "response": "Address problems promptly, truthfully, and lovingly.", "extra": [], "prayer": "Give me courage to speak truth in love.", "refs": "Ephesians 4:15"}], "lives": [{"who": "Peter", "sub": "Zeal, failure, and restoration", "text": "Peter responded boldly to Jesus, confessed Him as the Christ, and also resisted Jesus’ teaching about suffering. He later denied knowing Jesus and was restored by Him.", "lesson": "Enthusiasm is not a substitute for obedience. Christ calls us to faithfulness even when following Him is costly.", "refs": "Matthew 16:16–23 · Luke 22:54–62 · John 21:15–19"}, {"who": "John Mark", "sub": "Departure and renewed usefulness", "text": "John Mark accompanied Paul and Barnabas but returned to Jerusalem during their journey. Scripture does not explain his reason. Paul later considered him useful for ministry.", "lesson": "A past failure or disagreement need not define someone’s future faithfulness.", "refs": "Acts 13:13 · 15:37–39 · 2 Timothy 4:11"}, {"who": "Samson", "sub": "Strength without consistent obedience", "text": "God gave Samson extraordinary strength, yet Scripture records repeated destructive choices and serious moral failures.", "lesson": "Gifts and abilities never excuse disobedience. Strength without self-control can bring devastating consequences.", "refs": "Judges 13–16 · Hebrews 11:32"}, {"who": "Miriam", "sub": "Worship and correction", "text": "Miriam led Israel’s women in celebration after the crossing of the sea. Later, she and Aaron spoke against Moses and were confronted by God.", "lesson": "Joyful worship and meaningful service must remain joined to humility and obedience.", "refs": "Exodus 15:20–21 · Numbers 12:1–15"}]}, "8": {"n": 8, "name": "Challenger", "longs": "Independence, honesty, strength, and the ability to protect others.", "fear": "Betrayal, vulnerability, powerlessness, or unjust control.", "care": "Advocating, protecting, confronting problems, and taking responsibility.", "brings": "Courage, loyalty, decisiveness, and willingness to face difficult situations.", "blind": "Allowing strength to become domination, intimidation, anger, or resistance to correction.", "conflict": "Confront problems directly, speak forcefully, or expect others to respond with similar intensity.", "helps": "Honest communication, appropriate boundaries, and mutual accountability.", "stress": "Dishonesty, manipulation, powerlessness, and perceived injustice.", "supported": "Truthfulness, mutual respect, and freedom from manipulation.", "decides": "Conviction, rapid assessment, and decisive action.", "feedback": "Direct correction can be useful, but humility requires receiving truth even when it is delivered gently.", "leads": "Making decisions, confronting problems, and advocating for others.", "values": "Honesty, competence, initiative, and courage.", "fromLeader": "Clear communication, fairness, and appropriate responsibility.", "world": "Strength means control. Never appear weak, never back down, and make sure no one has power over you.", "scripture": {"text": "Jesus demonstrates strength through humility, gentleness, obedience, and sacrificial service. Authority is entrusted for the good of others, not personal domination.", "refs": "Mark 10:42–45 · Matthew 11:29"}, "grow": "Practice gentleness, humility, patience, and self-control. Use strength to defend others rather than control them.", "heart": "Am I using my strength to serve and protect, or to make others submit to my will?", "marriage": [{"title": "Intensity that overwhelms", "what": "Forceful communication may silence or intimidate your spouse, regardless of your intentions.", "underneath": "Fear of vulnerability, dishonesty, or losing control.", "response": "Listen without interrupting, exercise self-control, and take responsibility for the impact of your behavior.", "extra": [], "prayer": "Jesus, gentle and lowly, teach me Your way.", "refs": "Matthew 11:29 · James 1:19"}, {"title": "Hiding vulnerability", "what": "You may respond to hurt with anger, defensiveness, or emotional distance.", "underneath": "Fear that vulnerability means weakness.", "response": "Speak honestly about pain without using anger to control others.", "extra": [], "prayer": "Lord, give me humility to speak truthfully.", "refs": "Ephesians 4:25–26"}], "parentGood": ["You can teach courage and responsibility.", "You can defend children against injustice.", "You can model decisive action and conviction."], "parentHard": [{"title": "Using excessive force or intensity", "what": "Children may comply out of fear rather than learn wisdom and obedience.", "underneath": null, "response": "Correct with patience and self-control. Never confuse intimidation with godly authority.", "extra": [], "prayer": "Make me gentle and faithful in correction.", "refs": "Ephesians 6:4"}, {"title": "Controlling every decision", "what": "A desire to protect may prevent children from developing discernment.", "underneath": null, "response": "Provide appropriate boundaries while allowing age-appropriate responsibility.", "extra": [], "prayer": "Give me wisdom to guide without dominating.", "refs": "Colossians 3:21"}], "leaderGood": ["You can make difficult decisions.", "You can advocate for people treated unfairly.", "You can accept responsibility in challenging circumstances."], "leaderHard": [{"title": "Steamrolling others", "what": "Your intensity may discourage disagreement and prevent important concerns from being heard.", "underneath": null, "response": "Invite honest input, listen carefully, and exercise authority as a servant.", "extra": [], "prayer": "Make me quick to listen and humble in leadership.", "refs": "James 1:19 · Mark 10:42–45"}, {"title": "Refusing to acknowledge weakness", "what": "A need to appear strong may make it difficult to admit mistakes.", "underneath": null, "response": "Confess wrongdoing, receive correction, and model humility.", "extra": [], "prayer": "Give me courage to acknowledge my failures.", "refs": "Proverbs 28:13"}], "lives": [{"who": "Moses", "sub": "Leadership, humility, and disobedience", "text": "Moses confronted Pharaoh and led Israel, yet Scripture also records serious wrongdoing, including killing an Egyptian and disobeying God’s command at the rock.", "lesson": "Great responsibility requires humility and obedience. Authority does not place anyone beyond correction.", "refs": "Exodus 2:11–15 · Numbers 12:3 · 20:7–12"}, {"who": "Nehemiah", "sub": "Courageous leadership", "text": "Nehemiah organized the rebuilding of Jerusalem’s walls, confronted injustice, and resisted opposition. His forceful actions also invite careful examination rather than automatic imitation.", "lesson": "Courageous leadership must remain accountable to God’s righteousness.", "refs": "Nehemiah 2 · 5 · 13:23–27"}, {"who": "John, son of Zebedee", "sub": "Zeal redirected", "text": "John and James were called Sons of Thunder. They sought positions of honor and once wanted judgment against a Samaritan village. Jesus corrected their understanding of greatness and authority.", "lesson": "Zeal must be governed by the humility and love of Christ.", "refs": "Mark 3:17 · 10:35–45 · Luke 9:51–56"}, {"who": "Deborah", "sub": "Faithful courage", "text": "Deborah served as a prophetess and judge, delivered God’s instruction, and participated in Israel’s deliverance.", "lesson": "Courage and authority can be exercised faithfully in service to God’s purposes. The text does not identify her strength as a flaw.", "refs": "Judges 4–5"}]}, "9": {"n": 9, "name": "Peacemaker", "longs": "Harmony, stability, connection, and freedom from unnecessary conflict.", "fear": "Separation, rejection, tension, or relational disruption.", "care": "Listening, accommodating, remaining patient, and helping others cooperate.", "brings": "Steadiness, patience, acceptance, and thoughtful listening.", "blind": "Avoiding necessary confrontation, withholding honest opinions, or becoming passive.", "conflict": "Withdraw, agree prematurely, or delay difficult conversations.", "helps": "Respectful invitations to speak honestly and reasonable time to consider decisions.", "stress": "Pressure, hostility, rushed decisions, and unresolved tension.", "supported": "Respectful dialogue, clear expectations, and opportunities to contribute.", "decides": "Considering multiple perspectives and seeking agreement.", "feedback": "Clear, patient correction that encourages truthful engagement rather than withdrawal.", "leads": "Building consensus, listening, and creating stability.", "values": "Cooperation, harmony, fairness, and mutual respect.", "fromLeader": "Clear priorities, respectful communication, and meaningful opportunities for input.", "world": "Peace means avoiding conflict. Keep everyone happy, even if it means remaining silent about what is wrong.", "scripture": {"text": "Jesus blesses peacemakers, not merely conflict avoiders. Biblical peace is grounded in truth, righteousness, and reconciliation.", "refs": "Matthew 5:9 · Ephesians 4:15"}, "grow": "Practice courage, honesty, responsibility, and active peacemaking. Speak truth even when it creates temporary discomfort.", "heart": "Am I pursuing genuine peace, or avoiding the cost of doing what is right?", "marriage": [{"title": "Peace at any price", "what": "You may agree outwardly while withholding disagreement or quietly resisting.", "underneath": "Fear of conflict or disconnection.", "response": "Speak honestly and pursue reconciliation rather than superficial agreement.", "extra": [], "prayer": "Lord, make me a peacemaker who walks in truth.", "refs": "Matthew 5:9 · Ephesians 4:25"}, {"title": "Losing your voice", "what": "Continually accommodating others may prevent honest participation in important decisions.", "underneath": "Fear that disagreement threatens love.", "response": "Express convictions humbly and listen with equal care.", "extra": [], "prayer": "Give me courage to speak truth in love.", "refs": "Ephesians 4:15"}], "parentGood": ["You can model patience and calm.", "You can help children resolve disagreements.", "You can create a welcoming and supportive home."], "parentHard": [{"title": "Avoiding necessary discipline", "what": "Discomfort with conflict may lead you to neglect correction.", "underneath": null, "response": "Provide consistent, loving discipline and teach children responsibility.", "extra": [], "prayer": "Help me correct faithfully and lovingly.", "refs": "Ephesians 6:4"}, {"title": "Disengaging from responsibility", "what": "Withdrawal into routines, distractions, or passive habits may reduce meaningful connection.", "underneath": null, "response": "Be attentive and intentional with your children.", "extra": [], "prayer": "Teach me to use my time faithfully.", "refs": "Ephesians 5:15–16"}], "leaderGood": ["You can help people feel heard.", "You can promote cooperation.", "You can bring stability during conflict."], "leaderHard": [{"title": "Avoiding necessary confrontation", "what": "Unresolved problems may harm employees and weaken trust.", "underneath": null, "response": "Address wrongdoing fairly, promptly, and truthfully.", "extra": [], "prayer": "Make me a peacemaker, not merely a peacekeeper.", "refs": "Matthew 5:9 · Ephesians 4:15"}, {"title": "Delaying decisions", "what": "Waiting for universal agreement may leave others without direction.", "underneath": null, "response": "Seek wise counsel, accept responsibility, and make appropriate decisions.", "extra": [], "prayer": "Guide me in wisdom and faithful action.", "refs": "Proverbs 15:22"}], "lives": [{"who": "Abraham", "sub": "Peace and costly failures", "text": "Abraham sought peace with Lot by allowing him to choose land. Scripture also records occasions when Abraham misrepresented Sarah as his sister, exposing her to danger.", "lesson": "Seeking peace is good, but fear and deception are not acceptable means of obtaining it.", "refs": "Genesis 13:8–12 · 12:10–20 · 20"}, {"who": "Aaron", "sub": "Support and compromise", "text": "Aaron assisted Moses and later served as high priest. When pressured by the people, he participated in making the golden calf.", "lesson": "Yielding to pressure can become serious disobedience. Faithfulness requires courage.", "refs": "Exodus 17:10–13 · 32:1–24"}, {"who": "Isaac", "sub": "Peacefulness and family conflict", "text": "Isaac repeatedly moved rather than fight over disputed wells. His family also experienced favoritism and deception.", "lesson": "Peacefulness is valuable, but family relationships require truthfulness and responsible leadership.", "refs": "Genesis 25:28 · 26:17–22 · 27"}, {"who": "Eli", "sub": "The cost of failing to correct", "text": "Eli instructed Samuel in recognizing God’s call, but Scripture explicitly condemns his failure to restrain his sons.", "lesson": "Avoiding necessary correction can cause serious harm. Love and leadership require responsibility.", "refs": "1 Samuel 2:22–36 · 3:8–14"}]}}, "twoNote": "These prayers may rotate across spouse pairings. They are original, Scripture-inspired prayers, not quotations from the Bible.", "couple": [{"theme": "Love", "in": "Lord, clothe us in love.", "out": "Teach us to serve one another.", "refs": "Colossians 3:12–14"}, {"theme": "Humility", "in": "Give us humble hearts.", "out": "Help us consider one another.", "refs": "Philippians 2:3–4"}, {"theme": "Reconciliation", "in": "Make us truthful and gentle.", "out": "Lead us toward genuine peace.", "refs": "Ephesians 4:2–3, 15"}, {"theme": "Faithfulness", "in": "Teach us patient love.", "out": "Help us remain faithful.", "refs": "1 Corinthians 13:4–7"}, {"theme": "Marriage", "in": "Help us honor our covenant.", "out": "Teach us to love sacrificially.", "refs": "Genesis 2:24 · Ephesians 5:1–2"}], "pairing": {"same": ["You may recognize similar desires, tendencies, and struggles in one another. That familiarity can encourage understanding, but it may also mean sharing blind spots.", "Your shared personality patterns do not guarantee harmony. Christ calls both of you to humility, truthfulness, repentance, and sacrificial love."], "center": ["Within the Enneagram framework, your types belong to the same center: gut, heart, or head.", "This framework suggests that you may approach certain concerns in related ways, even when your responses differ. These categories are tools for reflection, not biblical identities or fixed psychological laws."], "different": ["You may approach decisions, emotions, and conflict differently. These differences can create misunderstandings, but they can also provide opportunities to practice patience, humility, and love.", "Your shared calling is not to become more alike in personality, but to grow in Christlike character."], "yada": {"paras": ["The Hebrew word yada broadly means “to know.” Depending on context, it can describe knowledge, recognition, or deeply personal relationship.", "Scripture calls believers to know God and to love one another sincerely. Understanding someone’s personality can support that love, but genuine love also requires truth, faithfulness, responsibility, and action."], "refs": "John 17:3 · 1 John 3:18"}}, "safety": ["Personality differences never justify intimidation, coercion, abuse, threats, exploitation, or dishonesty.", "Understanding why someone behaves a certain way does not remove their responsibility for that behavior.", "Forgiveness, reconciliation, and restored trust are related but distinct. Repentance requires more than words; it should produce meaningful change.", "No one is required to remain in an unsafe situation to demonstrate Christian love or submission.", "If you are experiencing relationship abuse in the United States, contact the National Domestic Violence Hotline at 1-800-799-7233 or text START to 88788.", "For suicide or mental health crises, call or text 988.", "If you are in immediate danger, call 911."], "work": {"note": "These principles apply regardless of Enneagram type.", "leader": {"paras": ["Authority is a responsibility entrusted for the good of others, not permission to dominate.", "Christ calls leaders toward humility, honesty, justice, self-control, and service."], "refs": "Mark 10:42–45 · Philippians 2:3–5"}, "employer": {"paras": ["Treat workers fairly. Communicate honestly, compensate justly, avoid favoritism, and exercise authority responsibly.", "Employees bear God’s image and must never be reduced to their usefulness or productivity."], "refs": "Colossians 4:1 · James 5:4 · James 2:1–9"}, "employee": {"paras": ["Work diligently and honestly. Receive appropriate correction, fulfill responsibilities, and communicate truthfully.", "Respect for authority does not require participating in wrongdoing or accepting abuse."], "refs": "Colossians 3:23–24 · Ephesians 4:25 · Acts 5:29"}, "calling": {"paras": ["Whatever our personality or position, we are called to love God and our neighbors.", "We do not measure righteousness by personality, productivity, popularity, authority, or personal comfort.", "We look to Jesus Christ, who calls us to follow Him."], "refs": "Matthew 22:37–40 · Luke 9:23"}}};
+// DISCIPLESHIP:END
 
 // A four-week cycle for each type: who you are in Christ, a memory verse, and
 // a breath prayer. Verses are King James (public domain) for this prototype.
@@ -517,6 +400,10 @@ const KEY = "yada-type-finder-v6";
 let st = load() || fresh();
 function fresh() { return { translation: "NIV", step: "intro", mode: "self", about: "", guess: "", sure: "", ans: {}, duel: {}, history: [], otherCode: "", tname: "", feel: "", length: "", note: "" }; }
 const LENGTH = ["", "Too short", "About right", "Too long"];
+const ABOUT_LABELS = { married: { y: "Married", n: "Not married", x: "Prefers not to say" }, kids: { y: "Has children", n: "No children", x: "Prefers not to say" }, gender: { m: "Man", f: "Woman", x: "Prefers not to say" } };
+const EXPLORE_LABELS = { marriage: "Marriage", parenting: "Parenting", friendship: "Friendship", leadership: "Leadership", employer: "Employer responsibilities", employee: "Employee relationships" };
+const aboutText = (s) => [ABOUT_LABELS.married[s.married], ABOUT_LABELS.kids[s.kids], ABOUT_LABELS.gender[s.gender]].filter(Boolean).join(", ");
+const exploreText = (s) => (s.explore || []).map((k) => EXPLORE_LABELS[k]).filter(Boolean).join(", ");
 function load() { try { const o = JSON.parse(localStorage.getItem(KEY)); return o && o.history ? o : null; } catch { return null; } }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} }
 function set(patch) { Object.assign(st, patch); save(); render(); }
@@ -619,10 +506,13 @@ function render() {
   if (location.hash === "#results") body = inboxView();
   else if (location.hash === "#about") body = aboutView();
   else if (location.hash === "#bible") body = bibleView();
+  else if (location.hash === "#people") body = peopleView();
+  else if (location.hash === "#parent") body = selfView("parent");
+  else if (location.hash === "#leader") body = selfView("leader");
   else if (st.step === "read") body = aboutView(true);
   else if (st.step === "quiz") { const p = plan(st); body = p.kind === "done" ? result() : p.kind === "d" ? duel(p) : statement(p); }
   else body = intro();
-  document.getElementById("app").innerHTML = head + (location.hash === "#results" || location.hash === "#about" || location.hash === "#bible" ? "" : (st.step === "intro" || (st.step === "quiz" && plan(st).kind === "done")) ? ownerBar() : "") + body;
+  document.getElementById("app").innerHTML = head + (["#results", "#about", "#bible", "#people", "#parent", "#leader"].includes(location.hash) ? "" : (st.step === "intro" || (st.step === "quiz" && plan(st).kind === "done")) ? ownerBar() : "") + body;
   wire();
 }
 
@@ -670,7 +560,7 @@ function intro() {
     <span class="eyebrow">Who is this about?</span>
     <div class="modes">
       <button type="button" class="mode" data-mode="self" aria-pressed="${!other()}"><strong>Me</strong><span class="muted small">Find your own likely type.</span></button>
-      <button type="button" class="mode" data-mode="other" aria-pressed="${other()}"><strong>Someone I know</strong><span class="muted small">Answer for a spouse or friend, then send them your code.</span></button>
+      <button type="button" class="mode" data-mode="other" aria-pressed="${other()}"><strong>Someone I know</strong><span class="muted small">Answer for a spouse or friend to understand them better.</span></button>
     </div>
   </section>
   ${other() ? `<section class="stack"><label for="about">Their first name</label><input type="text" id="about" value="${h(st.about)}" placeholder="Sarah"></section>` : ""}
@@ -726,7 +616,6 @@ function result() {
   const onLines = runners.filter((t) => t === stress || t === growth), onWings = runners.filter((t) => wings.includes(t));
   const guess = Number(st.guess) || 0, count = st.history.length;
   const avgs = TYPES.map((t) => r[t].avg), flat = Math.max(...avgs) - Math.min(...avgs) < 1;
-  const theirTop = st.otherCode ? decodeTop(st.otherCode) : null;
   const sideText = {
     good: `${they ? "They" : "You"} related more to the good-day side of ${an(first)}. That often means growth is already happening.`,
     hard: `${they ? "They" : "You"} related more to the hard-day side of ${an(first)}. That may just be a heavy season, and it shows where grace can meet ${they ? "them" : "you"}.`,
@@ -751,6 +640,12 @@ function result() {
     <p class="small"><strong>Final round:</strong> ${fin.join(" vs. ")}${clear ? " (won outright)" : ""}</p>
   </div>
   <div class="panel"><span class="eyebrow">Good day or hard day?</span><p>${sideText}</p></div>
+  ${flat ? "" : (() => { const d = DISC.types[first]; return `<div class="panel" id="discpanel"><span class="eyebrow">In light of Scripture</span>
+    <div class="contrast"><div class="cbox"><span class="eyebrow">The world may tell you</span><p>${h(d.world)}</p></div>
+      <div class="cbox word"><span class="eyebrow">What Scripture teaches</span><p>${h(d.scripture.text)}</p><p class="muted small">${h(d.scripture.refs)}</p></div></div>
+    <span class="eyebrow">Where Christ calls you to grow</span><p>${h(d.grow)}</p>
+    <p class="note"><strong>A question for your heart:</strong> ${h(d.heart)}</p>
+    <p class="muted small">${h(DISC.intro.paras[DISC.intro.paras.length - 1])}</p></div>`; })()}
   ${(() => { const wr = flat ? null : wingRead(st, first); if (!wr) return "";
     const Y = they ? "They" : "You";
     const side = (w) => `the ${w} side (${FLAVOR[w]})`;
@@ -773,9 +668,9 @@ function result() {
   ${top.map((t, i) => `<div class="panel"><span class="tag">${i === 0 ? "Most likely" : "Also possible"}</span><h3>Type ${t}, ${T[t].name}</h3>
     <p><strong>${they ? "Their" : "Your"} gift:</strong> ${h(T[t].gift)}</p>
     <p class="muted"><strong>The hard part:</strong> ${h(T[t].struggle)}</p>
-    <p class="muted"><strong>Growing in Christ:</strong> ${h(T[t].heart)} <span class="small">(${T[t].verse})</span></p></div>`).join("")}
+</div>`).join("")}
   ${flat || they ? "" : (() => {
-    const b = BIBLE[first], w = WEEKS[first][weekIndex()];
+    const w = WEEKS[first][weekIndex()];
     const growing = Object.keys(st.ans).filter((k) => k.startsWith(first + ".") && Number(k.split(".")[1]) % 2 === 0 && st.ans[k] >= 3).map((k) => BANK[first][Number(k.split(".")[1])]);
     return `<div class="panel tall"><span class="eyebrow">This week</span>
       <h3>${h(w.id)}</h3>
@@ -792,11 +687,10 @@ function result() {
         <p><span class="muted small">Breathe in:</span> <strong>${h(w.inhale)}</strong><br><span class="muted small">Breathe out:</span> <strong>${h(w.exhale)}</strong></p>
         <p class="muted small">Pray it slowly, a few times, whenever you need to come back to center.</p></div>
     </div>
-    <div class="panel"><span class="eyebrow">Someone in Scripture with a similar pattern</span>
-      <h3>${b.who}</h3>
-${person(b)}
-      <div id="moreppl" hidden>${BIBLE_MORE[first].map((o) => `<div class="stack" style="gap:8px;border-top:1px solid var(--line);padding-top:14px;margin-top:4px"><h3>${o.who}</h3>${person(o)}</div>`).join("")}</div>
-      <p class="muted small">We can't know anyone's type for certain, including people in the Bible. These are patterns we can see in their stories.</p>
+    <div class="panel"><span class="eyebrow">Biblical lives to learn from</span>
+      ${life(DISC.types[first].lives[0])}
+      <div id="moreppl" hidden>${DISC.types[first].lives.slice(1).map((l) => `<div class="stack" style="gap:8px;border-top:1px solid var(--line);padding-top:14px;margin-top:4px">${life(l)}</div>`).join("")}</div>
+      <p class="muted small">These are lives to learn from, not Enneagram diagnoses. We can't know anyone's type, including people in Scripture.</p>
       <div class="row" style="justify-content:space-between"><button type="button" class="secondary" id="seeothers" aria-expanded="false" aria-controls="moreppl">See others</button><button type="button" class="secondary" id="tobible" style="margin-left:auto">See all nine</button></div>
     </div>`; })()}
   <div class="panel"><span class="eyebrow">How the pieces fit</span>
@@ -807,17 +701,7 @@ ${person(b)}
     <div class="bars">${[...TYPES].sort(byAvg(r)).map((t) => `<div class="bar ${top.includes(t) ? "top" : ""}"><b>${t}</b><div class="track"><div class="fill" style="width:${(r[t].avg / 4) * 100}%"></div></div><span>${r[t].n} asked</span></div>`).join("")}</div>
     <p class="muted small">Full bar means “Almost always” on average. Types set aside early were asked fewer statements.</p>
   </div>
-  <div class="panel noprint">
-    <span class="eyebrow">${they ? `Send this to ${h(who())}` : "Compare with someone who knows you"}</span>
-    <code class="share" id="code">${encode(st)}</code>
-    <label for="othercode">Paste someone else's code</label>
-    <input type="text" id="othercode" value="${h(st.otherCode)}" placeholder="Y5-...">
-    <div class="row"><button type="button" id="compare">Compare</button></div>
-  </div>
-  ${theirTop ? `<div class="panel"><span class="eyebrow">Compared with their answers</span>
-    <p>Your top three: <strong>${top.join(", ")}</strong>. Theirs: <strong>${theirTop.join(", ")}</strong>.</p>
-    <p class="muted">${theirTop[0] === first ? "You both put the same type first." : `They put Type ${theirTop[0]} first. That's worth a gentle conversation, not a ruling.`}</p></div>`
-    : st.otherCode.trim() ? `<p class="note small">That code doesn't look right. It should look like Y5-713.</p>` : ""}
+  ${they || flat ? "" : relPanelHTML()}
   ${they ? "" : `<div class="panel noprint callout" id="sendpanel">
     <span class="eyebrow">Your feedback</span>
     <h2>Does this sound like you?</h2>
@@ -874,7 +758,7 @@ const DUELCODE = { a: "a", b: "b", both: "=", neither: "0" }, DUELBACK = { a: "a
 function resultsCode(s) {
   const raw = ALLKEYS.map((k) => k in s.ans ? String(s.ans[k]) : ".").join("").replace(/\.+/g, (m) => m.length > 2 ? `_${m.length.toString(36)}_` : m);
   const duels = Object.entries(s.duel).filter(([, v]) => v.length).map(([k, v]) => k.replace("-", "") + v.map((x) => DUELCODE[x]).join("")).join(",");
-  return ["YADA1", encodeURIComponent(s.tname.trim()), `${s.guess || 0}${s.sure || 0}${s.feel || 0}`, raw, duels, encodeURIComponent(s.note.trim()), s.length || 0].join("|");
+  return ["YADA1", encodeURIComponent(s.tname.trim()), `${s.guess || 0}${s.sure || 0}${s.feel || 0}`, raw, duels, encodeURIComponent(s.note.trim()), s.length || 0, `${s.married || 0}${s.kids || 0}${s.gender || 0}${(s.explore || []).map((k) => Object.keys(EXPLORE_LABELS).indexOf(k) + 1).join("")}`].join("|");
 }
 function readResults(code) {
   const parts = code.trim().split("|"); if (parts[0] !== "YADA1" || parts.length < 6) return null;
@@ -884,7 +768,7 @@ function readResults(code) {
     const ans = {}; ALLKEYS.forEach((k, i) => { if (raw[i] !== ".") ans[k] = Number(raw[i]); });
     const duel = {}; parts[4].split(",").filter(Boolean).forEach((d) => { duel[`${d[0]}-${d[1]}`] = d.slice(2).split("").map((x) => DUELBACK[x]); });
     const [guess, sure, feel] = parts[2].split("").map(Number);
-    return { name: decodeURIComponent(parts[1]) || "Anonymous", guess, sure, feel, note: decodeURIComponent(parts[5]), length: Number(parts[6]) || 0, ans, duel };
+    return { name: decodeURIComponent(parts[1]) || "Anonymous", guess, sure, feel, note: decodeURIComponent(parts[5]), length: Number(parts[6]) || 0, ...(() => { const a = (parts[7] || "").split(""), clean = (v) => v && v !== "0" ? v : ""; return { married: clean(a[0]), kids: clean(a[1]), gender: clean(a[2]), explore: a.slice(3).map((i) => Object.keys(EXPLORE_LABELS)[Number(i) - 1]).filter(Boolean) }; })(), ans, duel };
   } catch { return null; }
 }
 
@@ -926,6 +810,7 @@ function inboxView() {
     <p>Of the ${known.length} who were fairly or very sure of their type: <strong>${pct(hit1, known.length)}</strong> got it first, <strong>${pct(hit3, known.length)}</strong> had it in their top three.</p>
     <p class="muted">Felt right: ${[4, 3, 2, 1].map((f) => `${FEEL[f]} ${good.filter((g) => g.feel === f).length}`).join(" \u00b7 ")}</p>
     <p class="muted">Length: ${[3, 2, 1].map((l) => `${LENGTH[l]} ${good.filter((g) => g.length === l).length}`).join(" \u00b7 ")}</p>
+    <p class="muted">About testers: ${[["married", "y", "Married"], ["married", "n", "Not married"], ["kids", "y", "Have children"], ["gender", "m", "Men"], ["gender", "f", "Women"]].map(([k, v, l]) => `${l} ${good.filter((g) => g[k] === v).length}`).join(" \u00b7 ")}</p>
   </div>
   <div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:14px;min-width:560px;width:100%">
     <thead><tr>${["Tester", "Thought", "Finder said", "Top 3", "Wings", "Felt right", "Length", "Answers"].map((x) => `<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)">${x}</th>`).join("")}</tr></thead>
@@ -947,16 +832,173 @@ function inboxView() {
   </div>` : ""}`;
 }
 
+// The people in your life (#people), Me as a parent (#parent), Me as a leader (#leader).
+// All wording comes from DISC (content/discipleship-*.txt in the private repo). These views only arrange it.
+const REL_KINDS = {
+  spouse: { btn: "My spouse", title: "You and your spouse", role: "Spouse" },
+  friend: { btn: "A friend or family", title: "You and a friend or family member", role: "Them" },
+  coworker: { btn: "A coworker", title: "You and a coworker", role: "Coworker" },
+  boss: { btn: "My boss or leader", title: "You and your boss or leader", role: "Your leader" },
+  report: { btn: "Someone I lead", title: "You and someone you lead", role: "They" },
+};
+const D = (n) => DISC.types[n];
+const myType = () => st.step === "quiz" && plan(st).kind === "done" ? outcome(st).order[0] : 0;
+const refs = (r) => `<p class="muted small">${h(r)}</p>`;
+const pairRow = (label, text) => `<p><span class="tag" style="margin-right:6px">${label}</span>${h(text)}</p>`;
+const both = (title, key, A, B, You, Them) => `<div class="stack" style="gap:6px"><span class="eyebrow">${title}</span>${pairRow(You, A[key])}${pairRow(Them, B[key])}</div>`;
+const discCard = (c, whose) => `<details class="fric"><summary>${h(c.title)}${whose ? ` <span class="muted small">· ${whose}</span>` : ""}</summary>
+    <div class="stack" style="gap:8px;margin-top:10px">
+      <p>${h(c.what)}</p>
+      ${c.underneath ? `<p class="small"><strong>What may be underneath:</strong> ${h(c.underneath)}</p>` : ""}
+      <p class="small"><strong>Christlike response:</strong> ${h(c.response)}</p>
+      ${c.extra.map((x) => `<p class="small">${h(x)}</p>`).join("")}
+      <p class="small"><strong>Prayer:</strong> ${h(c.prayer)}</p>
+      ${refs(c.refs)}
+    </div></details>`;
+const standard = (title, s) => `<div class="stack" style="gap:6px"><span class="eyebrow">${title}</span>${s.paras.map((p) => `<p>${h(p)}</p>`).join("")}${refs(s.refs)}</div>`;
+// What's yours to own: the reader's own calling, so no page is only about the other person.
+const yoursToOwn = (me) => `<div class="panel"><span class="eyebrow">What's yours to own</span>
+    <p>${h(D(me).grow)}</p>
+    <p class="note"><strong>A question for your heart:</strong> ${h(D(me).heart)}</p></div>`;
+function pairingPanel(me, them) {
+  const P = DISC.pairing, which = me === them ? P.same : CENTER(me) === CENTER(them) ? P.center : P.different;
+  return `<div class="panel"><span class="eyebrow">${me === them ? "The same type" : CENTER(me) === CENTER(them) ? `The same center · ${CENTER(me)}` : "Different centers"}</span>
+    ${which.map((p) => `<p>${h(p)}</p>`).join("")}
+    <div class="stack" style="gap:6px;border-top:1px solid var(--line);padding-top:12px"><span class="eyebrow">What it means to know and love</span>
+      ${P.yada.paras.map((p) => `<p class="small">${h(p)}</p>`).join("")}${refs(P.yada.refs)}</div></div>`;
+}
+const safetyPanel = () => `<div class="panel"><span class="eyebrow">Relationship safety</span>${DISC.safety.map((p) => `<p class="small">${h(p)}</p>`).join("")}</div>`;
+function pairContent(me, them, rel, label) {
+  const A = D(me), B = D(them), You = "You · " + me, Them = `${h(label)} · ${them}`;
+  const conflict = `<div class="panel"><span class="eyebrow">When conflict comes</span>${both("In conflict, may", "conflict", A, B, You, Them)}${both("What may help", "helps", A, B, You, Them)}</div>`;
+  const theirCardsNote = `<p class="muted small">Their cards are written to them. Read them to understand, not to correct.</p>`;
+  if (rel === "spouse") {
+    const v = DISC.couple[(me + them) % DISC.couple.length];
+    return `
+    <div class="panel"><span class="eyebrow">Understanding each other</span>
+      ${both("Often longs for", "longs", A, B, You, Them)}${both("May fear", "fear", A, B, You, Them)}
+      ${both("Often shows care by", "care", A, B, You, Them)}${both("May bring to marriage", "brings", A, B, You, Them)}
+      ${both("Potential blind spot", "blind", A, B, You, Them)}</div>
+    ${pairingPanel(me, them)}
+    <div class="panel"><span class="eyebrow">Where you may clash · tap to open</span>
+      ${A.marriage.map((c) => discCard(c, "you")).join("")}
+      ${me === them ? "" : theirCardsNote + B.marriage.map((c) => discCard(c, label === "Spouse" ? "your spouse" : h(label))).join("")}</div>
+    ${conflict}
+    ${yoursToOwn(me)}
+    <div class="panel"><span class="eyebrow">For the two of you · ${h(v.theme)}</span>
+      <p><span class="muted small">Breathe in:</span> <strong>${h(v.in)}</strong><br><span class="muted small">Breathe out:</span> <strong>${h(v.out)}</strong></p>
+      ${refs(v.refs)}<p class="muted small">An original, Scripture-inspired prayer, not a quotation from the Bible.</p></div>
+    ${safetyPanel()}`;
+  }
+  if (rel === "friend") return `
+    <div class="panel"><span class="eyebrow">Understanding them</span>
+      ${both("Often longs for", "longs", A, B, You, Them)}${both("May fear", "fear", A, B, You, Them)}
+      ${both("Often stressed by", "stress", A, B, You, Them)}${both("Feels supported by", "supported", A, B, You, Them)}
+      ${both("Often shows care by", "care", A, B, You, Them)}</div>
+    ${pairingPanel(me, them)}${conflict}${yoursToOwn(me)}${safetyPanel()}`;
+  const W = DISC.work;
+  if (rel === "coworker") return `
+    <div class="panel"><span class="eyebrow">Working together</span>
+      ${both("Often decides by", "decides", A, B, You, Them)}${both("Receiving feedback", "feedback", A, B, You, Them)}
+      ${both("Often stressed by", "stress", A, B, You, Them)}${both("May value in a team", "values", A, B, You, Them)}</div>
+    ${conflict}${yoursToOwn(me)}
+    <div class="panel">${standard("As an employee", W.employee)}${standard("The shared calling", W.calling)}</div>`;
+  if (rel === "boss") return `
+    <div class="panel"><span class="eyebrow">How they may lead</span>
+      ${pairRow(Them, B.leads)}${both("May value in a team", "values", A, B, You, Them)}
+      ${both("Receiving feedback", "feedback", A, B, You, Them)}${both("Often stressed by", "stress", A, B, You, Them)}
+      <p class="muted small">What you may appreciate from a leader: ${h(A.fromLeader)}</p></div>
+    ${conflict}${yoursToOwn(me)}
+    <div class="panel">${standard("As an employee", W.employee)}${standard("The shared calling", W.calling)}</div>`;
+  return `
+    <div class="panel"><span class="eyebrow">Leading them well</span>
+      ${pairRow(Them, `May appreciate from a leader: ${B.fromLeader}`)}${pairRow(Them, `May value in a team: ${B.values}`)}
+      ${pairRow(Them, `Receiving feedback: ${B.feedback}`)}${pairRow(Them, `Feels supported by: ${B.supported}`)}
+      ${pairRow(You, `Often leads by: ${A.leads}`)}</div>
+    ${conflict}${yoursToOwn(me)}
+    <div class="panel">${standard("As a leader", W.leader)}${standard("As an employer", W.employer)}${standard("The shared calling", W.calling)}</div>`;
+}
+function peopleView() {
+  const me = myType();
+  if (!me) return `<section class="stack"><h1>Finish the finder first</h1><p class="muted">This uses your own result, so take the finder first.</p></section><div class="row"><button type="button" id="toquiz">Back</button></div>`;
+  const rel = REL_KINDS[st.rel] ? st.rel : "spouse", them = Number(st.relType) || 0, name = (st.relName || "").trim();
+  const roleLabel = rel === "spouse" && st.gender === "m" ? "Wife" : rel === "spouse" && st.gender === "f" ? "Husband" : REL_KINDS[rel].role;
+  const title = name ? `You and ${h(name)}` : rel === "spouse" && st.gender === "m" ? "You and your wife" : rel === "spouse" && st.gender === "f" ? "You and your husband" : REL_KINDS[rel].title;
+  return `
+  <section class="stack">
+    <span class="eyebrow">The people in your life</span>
+    <h1>${title}</h1>
+    <p class="muted">You're ${an(me)}, ${T[me].name}. Pick their type to see how you may fit together. These are patterns, not verdicts. Understanding someone's personality may explain their tendencies, but it never excuses harm, from them or from you.</p>
+  </section>
+  <div class="modes">${relKindsShown().map((k) => `<button type="button" class="mode" data-rel="${k}" aria-pressed="${k === rel}"><strong>${REL_KINDS[k].btn}</strong></button>`).join("")}</div>
+  <div class="panel">
+    <label for="relname">Their first name (optional)</label>
+    <input type="text" id="relname" value="${h(name)}" placeholder="${rel === "spouse" ? "Sarah" : "Alex"}">
+    <span class="eyebrow" style="margin-top:6px">What's their type?</span>
+    <div class="typegrid">${TYPES.map((n) => `<button type="button" class="mode" data-reltype="${n}" aria-pressed="${them === n}"><strong>${n}</strong><span class="muted small">${T[n].name.replace(/^The /, "")}</span></button>`).join("")}</div>
+    <p class="small muted">Not sure? <button type="button" class="linkish" id="invitefriend2">Send them the finder</button> and ask what they get. <span id="invited2" role="status"></span></p>
+  </div>
+  ${them ? pairContent(me, them, rel, name || roleLabel) : ""}
+  <div class="row"><button type="button" id="toquiz">Back to my results</button></div>`;
+}
+function selfView(kind) {
+  const me = myType();
+  if (!me) return `<section class="stack"><h1>Finish the finder first</h1></section><div class="row"><button type="button" id="toquiz">Back</button></div>`;
+  const P = D(me), parent = kind === "parent", W = DISC.work;
+  return `
+  <section class="stack">
+    <span class="eyebrow">As ${an(me)} · ${T[me].name}</span>
+    <h1>${parent ? "You as a parent" : "You as a leader"}</h1>
+    <p class="muted">${parent ? "Your tendencies show up in how you raise your children. This is about you, not them: children are still growing, so we don't assign them a type." : "Your tendencies show up in how you lead, at work, at church, or at home."} Personality may explain these patterns, but it never excuses sin.</p>
+  </section>
+  <div class="panel"><span class="eyebrow">Strengths to steward</span>
+    <ul style="margin:0;padding-left:20px" class="stack">${(parent ? P.parentGood : P.leaderGood).map((g) => `<li>${h(g)}</li>`).join("")}</ul></div>
+  <div class="panel"><span class="eyebrow">Where growth is needed · tap to open</span>
+    ${(parent ? P.parentHard : P.leaderHard).map((c) => discCard(c, "")).join("")}</div>
+  ${yoursToOwn(me)}
+  ${parent ? "" : `<div class="panel">${standard("As a leader", W.leader)}${standard("As an employer", W.employer)}${standard("The shared calling", W.calling)}</div>`}
+  <div class="row"><button type="button" id="toquiz">Back to my results</button></div>`;
+}
+// About you: optional, and only used where it changes what's shown.
+const EXPLORE = [["marriage", "Marriage"], ["parenting", "Parenting"], ["friendship", "Friendship"], ["leadership", "Leadership"], ["employer", "Employer responsibilities"], ["employee", "Employee relationships"]];
+const wants = (k) => !(st.explore || []).length || (st.explore || []).includes(k);
+function relKindsShown() {
+  return Object.keys(REL_KINDS).filter((k) => ({ spouse: wants("marriage") && st.married !== "n", friend: wants("friendship"), coworker: wants("employee"), boss: wants("employee"), report: wants("employer") || wants("leadership") })[k]);
+}
+function aboutYouHTML() {
+  const chip = (field, v, label) => `<button type="button" class="chipbtn" data-about="${field}" data-aboutval="${v}" aria-pressed="${st[field] === v}">${label}</button>`;
+  const ask = (q, field, opts) => `<div class="stack" style="gap:6px"><span class="small"><strong>${q}</strong></span><div class="chips2">${opts.map(([v, l]) => chip(field, v, l)).join("")}</div></div>`;
+  return `<details class="fric" ${st.married || st.kids || st.gender || (st.explore || []).length ? "" : "open"}><summary>About you <span class="muted small">· optional</span></summary>
+    <div class="stack" style="gap:12px;margin-top:10px">
+      ${ask("Are you married?", "married", [["y", "Married"], ["n", "Not married"], ["x", "Prefer not to say"]])}
+      ${ask("Do you have children?", "kids", [["y", "Yes"], ["n", "No"], ["x", "Prefer not to say"]])}
+      <div class="stack" style="gap:6px"><span class="small"><strong>Which relationships would you like to explore?</strong> <span class="muted">Choose any.</span></span>
+        <div class="chips2">${EXPLORE.map(([k, l]) => `<button type="button" class="chipbtn" data-explore="${k}" aria-pressed="${(st.explore || []).includes(k)}">${l}</button>`).join("")}</div></div>
+      ${ask("You are:", "gender", [["m", "A man"], ["f", "A woman"], ["x", "Prefer not to say"]])}
+    </div></details>`;
+}
+function relPanelHTML() {
+  const show = (k) => relKindsShown().includes(k);
+  const btn = (attr, label) => `<button type="button" class="secondary" ${attr}>${label}</button>`;
+  const home = [show("spouse") && btn('data-gorel="spouse"', st.gender === "m" ? "My wife" : st.gender === "f" ? "My husband" : "My spouse"), wants("parenting") && st.kids !== "n" && btn('id="toparent"', "Me as a parent"), show("friend") && btn('data-gorel="friend"', "A friend or family")].filter(Boolean);
+  const work = [wants("leadership") && btn('id="toleader"', "Me as a leader"), show("report") && btn('data-gorel="report"', "Someone I lead"), show("boss") && btn('data-gorel="boss"', "My boss or leader"), show("coworker") && btn('data-gorel="coworker"', "A coworker")].filter(Boolean);
+  return `<div class="panel noprint" id="relpanel"><span class="eyebrow">The people in your life</span>
+    <h3>How your tendencies may show up with the people closest to you</h3>
+    <p class="muted small">Strengths to steward, where you may clash, and where Christ calls you to grow, with prayers and Scripture.</p>
+    ${aboutYouHTML()}
+    ${home.length ? `<span class="eyebrow">Home</span><div class="relbtns">${home.join("")}</div>` : ""}
+    ${work.length ? `<span class="eyebrow">Work and leadership</span><div class="relbtns">${work.join("")}</div>` : ""}
+  </div>`;
+}
+const life = (l) => `<h3>${h(l.who)}</h3><p class="muted small" style="margin-top:-6px">${h(l.sub)}</p><p>${h(l.text)}</p><p class="note small"><strong>The lesson:</strong> ${h(l.lesson)}</p><p class="muted small">${h(l.refs)}</p>`;
 function bibleView() {
   return `
   <section class="stack">
-    <span class="eyebrow">People in Scripture</span>
+    <span class="eyebrow">Biblical lives to learn from</span>
     <h1>Nine patterns, one faithful God</h1>
-    <p class="muted">Each of these people had real gifts and real struggles, and God used them for His glory. We can't know anyone's type for certain, including people in the Bible. These are patterns we can see in their stories.</p>
+    <p class="muted">These are lives to learn from, not Enneagram diagnoses. Scripture records their faithfulness, their suffering, and their sin honestly, and points us to God's grace. We can't know anyone's type, including people in Scripture.</p>
   </section>
-  ${TYPES.map((n) => { const b = BIBLE[n]; return `<div class="panel"><span class="eyebrow">Type ${n} \u00b7 ${T[n].name}</span><h3>${b.who}</h3>
-${person(b)}
-    <p class="muted small">Others with this pattern: ${BIBLE_MORE[n].map((o) => o.who).join(", ")}</p></div>`; }).join("")}
+  ${TYPES.map((n) => `<div class="panel"><span class="eyebrow">Type ${n} \u00b7 ${T[n].name}</span>${DISC.types[n].lives.map((l, i) => `<div class="stack" style="gap:8px;${i ? "border-top:1px solid var(--line);padding-top:14px;" : ""}">${life(l)}</div>`).join("")}</div>`).join("")}
   <div class="row"><button type="button" id="toquiz">Back</button></div>`;
 }
 
@@ -971,6 +1013,11 @@ function aboutView(required) {
     <p class="quote">\u201cO LORD, you have searched me and known me!\u201d<cite>Psalm 139:1 (ESV)</cite></p>
     <p><strong>Only God can fully know someone.</strong> He made us, He sees every part of us, and nothing about us is hidden from Him. No test, no type, and no amount of time with a person will ever give us that kind of knowing.</p>
     <p>What we can do is know each other better. That's what Yada is about: knowing yourself honestly and knowing the people God has put in your life well enough to love them better, whether that's your spouse, your kids, your friends, or the people you work with. The Enneagram is one of the tools we use to get there, so before you start, here's what it is and what it isn't.</p>
+
+    <p class="orn" aria-hidden="true">\u05d9</p>
+    <h2>${h(DISC.intro.title)}</h2>
+    ${DISC.intro.paras.map((p, i) => `<p${i === 3 ? ' class="quote" style="font-size:22px"' : ""}>${h(p)}</p>`).join("")}
+    <p class="muted small">${h(DISC.intro.refs)}</p>
 
     <p class="orn" aria-hidden="true">\u05d9</p>
     <h2>What it is</h2>
@@ -1111,13 +1158,15 @@ function resultsPdf() {
   const fb = !st.noFeedback, note = st.note.trim(), FEEL = ["", "Not at all", "Partly", "Mostly", "Spot on"];
   // Their feedback comes right after the headline, where the tester box sits on the page.
   const feedback = () => {
-    if (!(fb && (st.tname.trim() || st.feel || st.length || note || st.guess))) return;
+    if (!(fb && (st.tname.trim() || st.feel || st.length || note || st.guess || aboutText(st)))) return;
     section(() => {
       eyebrow("My feedback");
       const row = (lead, val) => para({ text: `${lead} ${val}`, lead, after: 4 });
       if (st.tname.trim()) row("From:", st.tname.trim());
       if (st.feel) row("How well does the result fit?", FEEL[st.feel]);
       if (st.length) row("How did the length feel?", LENGTH[st.length]);
+      if (aboutText(st)) row("About me:", aboutText(st));
+      if (exploreText(st)) row("Want to explore:", exploreText(st));
       if (note) row("Feedback:", note);
       if (st.guess) row("Before today I thought I was:", Number(st.guess) ? `${st.guess}, ${T[st.guess].name}${st.sure ? ` (${["", "just a guess", "fairly sure", "very sure"][st.sure]})` : ""}` : "I had no idea");
     });
@@ -1128,7 +1177,7 @@ function resultsPdf() {
     section(() => g.els.forEach((el, i) => { if (!dry && i === g.els.length - 2) need(measure(() => { draw(el, i); draw(g.els[i + 1], i + 1); })); draw(el, i); }));
     if (gi === 0) feedback();
   });
-  const code = resultsCode(fb ? st : { ...st, tname: "", feel: "", length: "", note: "" });
+  const code = resultsCode(fb ? st : { ...st, tname: "", feel: "", length: "", note: "", married: "", kids: "", gender: "", explore: [] });
   section(() => {
     eyebrow("Results code for Yada");
     font("courier", "normal", 7.5, SOFT);
@@ -1151,7 +1200,7 @@ function shareMessage() {
   const fb = !st.noFeedback, note = st.note.trim();
   const parts = [st.feel ? `The result ${FEELTEXT[st.feel]}.` : "", st.length ? `The length felt ${LENGTH[st.length].toLowerCase()}.` : "", note ? `\u201c${note}\u201d` : ""].filter(Boolean);
   const said = fb && parts.length ? `\n\nMy feedback: ${parts.join(" ")}` : "";
-  const code = resultsCode(fb ? st : { ...st, tname: "", feel: "", length: "", note: "" });
+  const code = resultsCode(fb ? st : { ...st, tname: "", feel: "", length: "", note: "", married: "", kids: "", gender: "", explore: [] });
   return `${shareText(shareSummary())}${said}\n\nFind yours: ${SHARE_URL}\n\nResults code for Yada: ${code}`;
 }
 // Send to the Yada team: one email per tap with their results, feedback, and the code for #results.
@@ -1169,6 +1218,8 @@ function sendToTeam() {
       "Result": flat ? "No type stood out yet" : `Type ${first}, ${T[first].name} (also possible: ${runners.join(" and ")})`,
       "How well does it fit?": FEEL[st.feel] || "(not answered)",
       "Length": LENGTH[st.length] || "(not answered)",
+      "About them": aboutText(st) || "(not answered)",
+      "Wants to explore": exploreText(st) || "(not answered)",
       "Feedback": note || "(none)",
       "Thought their type was": Number(st.guess) ? `${st.guess}, ${T[st.guess].name}${st.sure ? ` (${SURE[st.sure]})` : ""}` : st.guess === "0" ? "No idea" : "(not answered)",
       "Answers": String(st.history.length),
@@ -1182,8 +1233,8 @@ function sendToTeam() {
 }
 // Invite someone to take the finder: just the link and a line about it, never the sender's results.
 const FRIEND_INVITE = "I just found out what drives me. Take this and we can compare. It's a 5–10 minute Christ-centered Enneagram test:";
-function inviteFriend() {
-  const status = document.getElementById("invited");
+function inviteFriend(statusId = "invited") {
+  const status = document.getElementById(statusId);
   const copy = () => navigator.clipboard.writeText(`${FRIEND_INVITE} ${SHARE_URL}`)
     .then(() => { status.textContent = "Link copied. Paste it into a text or email."; })
     .catch(() => { status.textContent = "Here's the link to send:"; status.insertAdjacentHTML("afterend", `<code class="share">${h(SHARE_URL)}</code>`); });
@@ -1226,7 +1277,16 @@ function wire() {
   on("#sendteam", sendToTeam);
   if ($("#nofeedback")) $("#nofeedback").onchange = (e) => set({ noFeedback: e.target.checked });
   on("#printresults", () => window.print());
-  on("#invitefriend", inviteFriend);
+  on("#invitefriend", () => inviteFriend());
+  on("#invitefriend2", () => inviteFriend("invited2"));
+  document.querySelectorAll("[data-gorel]").forEach((b) => b.onclick = () => { st.rel = b.dataset.gorel; save(); location.hash = "people"; window.scrollTo(0, 0); });
+  on("#toparent", () => { location.hash = "parent"; window.scrollTo(0, 0); });
+  on("#toleader", () => { location.hash = "leader"; window.scrollTo(0, 0); });
+  document.querySelectorAll("[data-about]").forEach((b) => b.onclick = () => set({ [b.dataset.about]: st[b.dataset.about] === b.dataset.aboutval ? "" : b.dataset.aboutval }));
+  document.querySelectorAll("[data-explore]").forEach((b) => b.onclick = () => { const e = new Set(st.explore || []); e.has(b.dataset.explore) ? e.delete(b.dataset.explore) : e.add(b.dataset.explore); set({ explore: [...e] }); });
+  document.querySelectorAll("[data-rel]").forEach((b) => b.onclick = () => set({ rel: b.dataset.rel }));
+  document.querySelectorAll("[data-reltype]").forEach((b) => b.onclick = () => set({ relType: b.dataset.reltype }));
+  if ($("#relname")) $("#relname").onchange = (e) => set({ relName: e.target.value });
   on("#tofeedback", goToFeedback);
   on("#fbbarbtn", goToFeedback);
   on("#nudgeadd", () => { $("#sharenudge").hidden = true; goToFeedback(); });
@@ -1247,8 +1307,6 @@ function wire() {
   document.querySelectorAll("[data-duel]").forEach((b) => b.onclick = () => {
     const p = plan(st); st.duel = { ...st.duel, [p.key]: [...(st.duel[p.key] || []), b.dataset.duel] }; answer({ d: p.key });
   });
-  if ($("#othercode")) $("#othercode").oninput = (e) => { st.otherCode = e.target.value; save(); };
-  on("#compare", () => render());
   if ($("#translation")) $("#translation").onchange = (e) => set({ translation: e.target.value });
   if ($("#sure")) $("#sure").onchange = (e) => set({ sure: e.target.value });
   for (const id of ["tname", "note"]) if ($("#" + id)) $("#" + id).oninput = (e) => { st[id] = e.target.value; save(); };
