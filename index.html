@@ -83,6 +83,7 @@ textarea { min-height: 70px; font-size: 14px; }
 .bar.top .fill { background: var(--brand); }
 .bar b { font-family: var(--display); font-size: 18px; font-weight: 400; }
 /* The tester box is a light card in both themes so it stands out from everything else. */
+.printonly { display: none; }
 .callout { --surface: #fff; --ink: #2d2620; --ink-soft: #5f554b; --line: #e3d9cb; --brand: #6b4f2e; --brand-ink: #fffaf0; --focus: #2f5c7c;
   color-scheme: light; color: var(--ink); background: #fffaf0; border: 2px solid #d9bf94; box-shadow: 0 8px 28px rgba(201, 167, 122, .35); padding: 24px 20px; }
 .callout h2 { font-size: 30px; }
@@ -102,16 +103,27 @@ code.share { user-select: all; -webkit-user-select: all; display: block; font-si
 .readbar { position: fixed; left: 0; right: 0; top: 0; height: calc(4px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 10; box-sizing: border-box; }
 .readbar div { height: 4px; width: 0; background: var(--brand); }
 @media (prefers-reduced-motion: reduce) { .progress div { transition: none; } }
-/* Save as PDF or print: light colors, no controls, panels kept whole. */
+/* Save as PDF or print: light colors, no controls, tighter sizes. Small boxes stay whole;
+   tall ones (.tall) may continue on the next page with their border repeated. */
 @media print {
   :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
     --bg: #fff; --surface: #fff; --ink: #2d2620; --ink-soft: #5f554b; --line: #e3d9cb;
     --brand: #6b4f2e; --brand-ink: #f3e9d8; --pick: #55704f; color-scheme: light; }
-  @page { margin: 14mm; }
-  body { font-size: 12pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  main { max-width: none; padding: 0; gap: 14px; }
+  @page { size: letter; margin: 14mm 15mm; }
+  body { font-size: 10.5pt; line-height: 1.45; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  main { max-width: none; padding: 0; gap: 10px; }
+  header .mark { width: 30px; height: 30px; font-size: 19px; border-radius: 8px; }
+  .brand { font-size: 17px; }
+  h1 { font-size: 24pt; } h3 { font-size: 14pt; }
+  .stack { gap: 8px; }
+  .panel { padding: 12px 16px; gap: 7px; border-radius: 10px; break-inside: avoid; }
+  .panel.tall { break-inside: auto; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  p, li, .bar, h3 + p { break-inside: avoid; }
+  h1, h2, h3, .eyebrow, .tag { break-after: avoid; }
+  .bars { gap: 4px; }
+  .small { font-size: 9pt; }
   .noprint, button, select, label[for="translation"] { display: none !important; }
-  .panel { break-inside: avoid; }
+  .printonly { display: block !important; }
   a { color: inherit; }
 }
 </style>
@@ -662,7 +674,7 @@ function result() {
       <p class="small"><strong>The gift:</strong> ${h(youify(d.gift))}</p>
       <p class="small"><strong>Watch for:</strong> ${h(youify(d.watch))}</p>
       <p class="small"><strong>Lean into it when:</strong> ${h(youify(d.use))}</p></div>`; };
-    return `<div class="panel"><span class="eyebrow">${they ? "Their" : "Your"} wings</span><p>${line}</p>
+    return `<div class="panel tall"><span class="eyebrow">${they ? "Their" : "Your"} wings</span><p>${line}</p>
       <div class="bars">${bar(wr.a, wr.va)}${bar(wr.b, wr.vb)}</div>
       ${detail(wr.hi)}${detail(wr.lo)}
       <p class="muted small">Your wings are the two types on either side of yours. Most people draw on both, often more of one in certain settings, like leading at work versus relaxing at home. This isn't a label, and wings have very little research behind them.</p></div>`; })()}
@@ -673,7 +685,7 @@ function result() {
   ${flat || they ? "" : (() => {
     const b = BIBLE[first], w = WEEKS[first][weekIndex()];
     const growing = Object.keys(st.ans).filter((k) => k.startsWith(first + ".") && Number(k.split(".")[1]) % 2 === 0 && st.ans[k] >= 3).map((k) => BANK[first][Number(k.split(".")[1])]);
-    return `<div class="panel"><span class="eyebrow">This week</span>
+    return `<div class="panel tall"><span class="eyebrow">This week</span>
       <h3>${h(w.id)}</h3>
       <div class="stack" style="gap:6px"><span class="eyebrow">Ways you're growing</span>
         ${growing.length ? `<p>You said these are often true of you. That's the good-day side of a ${first}, and it's worth noticing:</p>
@@ -716,7 +728,8 @@ function result() {
     <p class="muted">${theirTop[0] === first ? "You both put the same type first." : `They put Type ${theirTop[0]} first. That's worth a gentle conversation, not a ruling.`}</p></div>`
     : st.otherCode.trim() ? `<p class="note small">That code doesn't look right. It should look like Y5-713.</p>` : ""}
   <div class="row"><button type="button" class="secondary" id="back">Change my last answer</button><button type="button" class="secondary" id="restart">Start over</button></div>
-  <p class="muted small">The Enneagram is a helpful lens, not a scientifically settled category. It describes how someone might be wired. It doesn't tell you their story.</p>`;
+  <p class="muted small">The Enneagram is a helpful lens, not a scientifically settled category. It describes how someone might be wired. It doesn't tell you their story.</p>
+  <p class="printonly muted small">Yada type finder \u00b7 A Studio 2918 project \u00b7 ${SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "")} \u00b7 ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>`;
 }
 
 // Tester results: everything needed to rerun the finder, in one line of text.
@@ -890,70 +903,112 @@ function loadPdfLib() {
   document.head.append(sc);
 }
 // Builds the PDF from the results as they appear on screen, minus the questions and buttons.
+// Each section is measured first (a dry run), so it moves to a new page whole instead of splitting,
+// unless it's a long section (over a quarter page) with real room left, which then flows on. Paragraphs never split.
 function resultsPdf() {
   const { jsPDF } = window.jspdf, doc = new jsPDF({ unit: "pt", format: "letter" });
-  const W = 612, H = 792, X = 54, MAX = W - 2 * X, BOTTOM = H - 64;
+  const W = 612, H = 792, X = 54, MAX = W - 2 * X, TOP = 60, BOTTOM = H - 60;
   const INK = [45, 38, 32], SOFT = [95, 85, 75], BRAND = [107, 79, 46], LINE = [227, 217, 203];
-  const clean = (t) => String(t).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-").replace(/…/g, "...").replace(/•/g, "-").replace(/ /g, " ").replace(/[^\x00-\xff]/g, "").replace(/[ \t]+/g, " ").trim();
-  let color = INK;
-  const style = (font, weight, size, c) => { doc.setFont(font, weight); doc.setFontSize(size); doc.setTextColor(...c); color = c; };
-  let y = 62;
-  const need = (hh) => { if (y + hh > BOTTOM) { doc.addPage(); y = 62; } };
-  const para = (text, lh, lead) => {
+  const clean = (t) => String(t).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-").replace(/…/g, "...").replace(/ /g, " ").replace(/[^\x00-\xff\n]/g, "").replace(/[ \t]+/g, " ").replace(/ *\n */g, "\n").trim();
+  let y = TOP, dry = false;
+  const put = (fn) => { if (!dry) fn(); };
+  const need = (h) => { if (!dry && y + h > BOTTOM) { doc.addPage(); y = TOP; } };
+  const font = (face, weight, size, c) => { doc.setFont(face, weight); doc.setFontSize(size); doc.setTextColor(...c); };
+  // One paragraph, kept whole. lead = bold label at the start; indent = bullet space.
+  const para = ({ text, size = 10.5, lh = 15, color = INK, lead = "", indent = 0, link = "", after = 7 }) => {
     text = clean(text); if (!text) return;
-    if (lead) {
-      lead = clean(lead); const rest = text.slice(lead.length).trim();
-      const ff = doc.getFont().fontName, fs = doc.getFontSize();
-      need(lh); doc.setFont(ff, "bold"); doc.text(lead, X, y); const w = doc.getTextWidth(lead + " "); doc.setFont(ff, "normal"); doc.setTextColor(...color);
-      const first = rest ? doc.splitTextToSize(rest, MAX - w)[0] : "";
-      if (first) doc.text(first, X + w, y); y += lh;
-      const more = rest.slice(first.length).trim(); if (more) for (const l of doc.splitTextToSize(more, MAX)) { need(lh); doc.text(l, X, y); y += lh; }
-      doc.setFontSize(fs); return;
-    }
-    for (const l of doc.splitTextToSize(text, MAX)) { need(lh); doc.text(l, X, y); y += lh; }
+    font("helvetica", "normal", size, color);
+    let rest = text, leadW = 0;
+    if (lead) { lead = clean(lead); rest = text.slice(lead.length).trim(); doc.setFont("helvetica", "bold"); leadW = [...lead].reduce((w, ch) => w + doc.getTextWidth(ch), 0) + size * 0.3; doc.setFont("helvetica", "normal"); }
+    const firstW = MAX - indent - leadW, first = rest ? doc.splitTextToSize(rest, firstW)[0] : "";
+    const lines = [first, ...(rest.slice(first.length).trim() ? doc.splitTextToSize(rest.slice(first.length).trim(), MAX - indent) : [])];
+    need(lines.length * lh);
+    put(() => {
+      if (indent) { doc.setFillColor(...color); doc.circle(X + 3, y - size * 0.32, 1.4, "F"); }
+      if (lead) { doc.setFont("helvetica", "bold"); doc.text(lead, X + indent, y); doc.setFont("helvetica", "normal"); }
+      lines.forEach((l, i) => {
+        const lx = X + indent + (i === 0 ? leadW : 0), ly = y + i * lh;
+        if (link) { doc.setTextColor(...BRAND); doc.textWithLink(l, lx, ly, { url: link }); doc.setDrawColor(...BRAND); doc.setLineWidth(0.5); doc.line(lx, ly + 1.5, lx + doc.getTextWidth(l), ly + 1.5); }
+        else doc.text(l, lx, ly);
+      });
+    });
+    y += lines.length * lh + after;
   };
-  const eyebrow = (t) => { need(30); style("helvetica", "bold", 8, SOFT); doc.text(clean(t).toUpperCase(), X, y, { charSpace: 0.8 }); y += 15; };
-  style("times", "bold", 22, BRAND); doc.text("Yada", X, y);
-  style("helvetica", "normal", 9, SOFT); doc.text(`Type finder results · ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}`, X + 58, y);
-  y += 30;
-  let panel = null;
-  const els = [...document.querySelectorAll("main .eyebrow, main .tag, main h1, main h3, main p, main li, main .bar")]
-    .filter((el) => !el.closest(".noprint, header") && el.offsetParent !== null);
-  for (const el of els) {
-    const pn = el.closest(".panel, section");
-    if (pn !== panel) { panel = pn; y += 6; need(40); doc.setDrawColor(...LINE); doc.setLineWidth(0.8); doc.line(X, y - 10, X + MAX, y - 10); y += 6; }
-    if (el.matches(".eyebrow, .tag")) eyebrow(el.textContent);
-    else if (el.tagName === "H1") { y += 12; style("times", "normal", 24, INK); para(el.textContent, 28); y += 4; }
-    else if (el.tagName === "H3") { y += 6; style("times", "normal", 15, INK); para(el.textContent, 19); y += 2; }
-    else if (el.classList.contains("bar")) {
-      need(16); const label = el.querySelector("b").textContent, val = el.querySelector("span").textContent, pct = parseFloat(el.querySelector(".fill").style.width) || 0;
-      style("times", "normal", 12, INK); doc.text(clean(label), X, y);
-      doc.setFillColor(...LINE); doc.roundedRect(X + 22, y - 7, MAX - 112, 7, 3.5, 3.5, "F");
-      if (pct > 0) { doc.setFillColor(...(el.classList.contains("top") ? BRAND : SOFT)); doc.roundedRect(X + 22, y - 7, Math.max(7, (MAX - 112) * pct / 100), 7, 3.5, 3.5, "F"); }
-      style("helvetica", "normal", 9, SOFT); doc.text(clean(val), X + MAX, y, { align: "right" }); y += 16;
-    } else {
-      const muted = el.closest(".muted") || el.classList.contains("note"), small = el.classList.contains("small");
-      style("helvetica", "normal", small ? 9.5 : 10.5, muted ? SOFT : INK);
-      const strong = el.firstElementChild?.tagName === "STRONG" && el.textContent.trimStart().startsWith(el.firstElementChild.textContent) ? el.firstElementChild.textContent : "";
-      para((el.tagName === "LI" ? "- " : "") + el.innerText, small ? 13 : 14.5, strong); y += 5;
-    }
+  const eyebrow = (t) => { need(40); font("helvetica", "bold", 7.5, SOFT); put(() => doc.text(clean(t).toUpperCase(), X, y, { charSpace: 0.9 })); y += 16; };
+  const heading = (t, size, lh, top) => { y += top + size * 0.4; need(lh + 30); font("times", "normal", size, INK); for (const l of doc.splitTextToSize(clean(t), MAX)) { put(() => doc.text(l, X, y)); y += lh; } y += 3; };
+  const bar = (el) => {
+    need(16); const label = clean(el.querySelector("b").textContent), val = clean(el.querySelector("span").textContent), pct = parseFloat(el.querySelector(".fill").style.width) || 0;
+    const tx = X + 20, tw = MAX - 20 - 66;
+    put(() => {
+      font("times", "normal", 12, INK); doc.text(label, X, y);
+      doc.setFillColor(...LINE); doc.roundedRect(tx, y - 7, tw, 6, 3, 3, "F");
+      if (pct > 0) { doc.setFillColor(...(el.classList.contains("top") ? BRAND : SOFT)); doc.roundedRect(tx, y - 7, Math.max(6, tw * pct / 100), 6, 3, 3, "F"); }
+      font("helvetica", "normal", 9, SOFT); doc.text(val, X + MAX, y, { align: "right" });
+    });
+    y += 16;
+  };
+  const drawEl = (el, firstInSection) => {
+    if (el.matches(".eyebrow, .tag")) return eyebrow(el.textContent);
+    if (el.tagName === "H1") return heading(el.textContent, 24, 27, 6);
+    if (el.tagName === "H3") return heading(el.textContent, 15, 18, firstInSection ? 0 : 8);
+    if (el.classList.contains("bar")) { bar(el); if (!el.nextElementSibling) y += 6; return; }
+    const muted = !!el.closest(".muted"), small = el.classList.contains("small");
+    const strong = el.firstElementChild?.tagName === "STRONG" && el.textContent.trimStart().startsWith(el.firstElementChild.textContent) ? el.firstElementChild.textContent : "";
+    const a = el.querySelector("a"), link = a && a.textContent.trim() === el.textContent.trim() ? a.href : "";
+    para({ text: el.innerText, size: small ? 9.5 : 10.5, lh: small ? 13.5 : 15, color: muted ? SOFT : INK, lead: strong, indent: el.tagName === "LI" ? 12 : 0, link, after: el.tagName === "LI" ? 3 : small ? 6 : 7 });
+  };
+  const measure = (fn) => { const y0 = y, d = dry; dry = true; fn(); const h = y - y0; y = y0; dry = d; return h; };
+  // A section: a rule, then its contents. Measured first so it can move to the next page whole.
+  const section = (draw, rule = true) => {
+    const y0 = y; dry = true; draw(); const h = y - y0; y = y0; dry = false;
+    const room = BOTTOM - y - (rule ? 24 : 0);
+    if (h > room && (h < (BOTTOM - TOP) * 0.25 || room < 120)) { doc.addPage(); y = TOP; }
+    else if (rule) { y += 4; put(() => { doc.setDrawColor(...LINE); doc.setLineWidth(0.8); doc.line(X, y, X + MAX, y); }); y += 20; }
+    draw();
+  };
+  font("times", "bold", 22, BRAND); doc.text("Yada", X, y);
+  font("helvetica", "normal", 9, SOFT); doc.text(`Type finder results · ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}`, X + 56, y);
+  y += 24;
+  const groups = [];
+  for (const el of document.querySelectorAll("main .eyebrow, main .tag, main h1, main h3, main p, main li, main .bar")) {
+    if (el.closest(".noprint, header") || el.offsetParent === null) continue;
+    const home = el.closest(".panel, section") || el;
+    if (!groups.length || groups[groups.length - 1].home !== home) groups.push({ home, els: [] });
+    groups[groups.length - 1].els.push(el);
   }
   const fb = !st.noFeedback, note = st.note.trim(), FEEL = ["", "Not at all", "Partly", "Mostly", "Spot on"];
-  y += 8; need(60); doc.setDrawColor(...LINE); doc.line(X, y - 10, X + MAX, y - 10); y += 6;
-  if (fb && (st.tname.trim() || st.feel || st.length || note || st.guess)) {
-    eyebrow("My feedback"); style("helvetica", "normal", 10.5, INK);
-    if (st.tname.trim()) para(`From: ${st.tname.trim()}`, 14.5, "From:");
-    if (st.guess) para(`Before today I thought I was: ${Number(st.guess) ? `${st.guess}, ${T[st.guess].name}${st.sure ? ` (${["", "just a guess", "fairly sure", "very sure"][st.sure]})` : ""}` : "I had no idea"}`, 14.5, "Before today I thought I was:");
-    if (st.feel) para(`Does the result feel right? ${FEEL[st.feel]}`, 14.5, "Does the result feel right?");
-    if (st.length) para(`How did the length feel? ${LENGTH[st.length]}`, 14.5, "How did the length feel?");
-    if (note) para(`Felt off or confusing: ${note}`, 14.5, "Felt off or confusing:");
-    y += 10;
-  }
-  eyebrow("Results code for Yada"); style("courier", "normal", 7.5, SOFT);
+  // Their feedback comes right after the headline, where the tester box sits on the page.
+  const feedback = () => {
+    if (!(fb && (st.tname.trim() || st.feel || st.length || note || st.guess))) return;
+    section(() => {
+      eyebrow("My feedback");
+      const row = (lead, val) => para({ text: `${lead} ${val}`, lead, after: 4 });
+      if (st.tname.trim()) row("From:", st.tname.trim());
+      if (st.feel) row("Does the result feel right?", FEEL[st.feel]);
+      if (st.length) row("How did the length feel?", LENGTH[st.length]);
+      if (note) row("Feedback:", note);
+      if (st.guess) row("Before today I thought I was:", Number(st.guess) ? `${st.guess}, ${T[st.guess].name}${st.sure ? ` (${["", "just a guess", "fairly sure", "very sure"][st.sure]})` : ""}` : "I had no idea");
+    });
+  };
+  groups.forEach((g, gi) => {
+    const draw = (el, i) => drawEl(el, i === 0 || g.els[i - 1].matches(".eyebrow, .tag"));
+    // The last two items of a section stay together, so no line is left alone at the top of a page.
+    section(() => g.els.forEach((el, i) => { if (!dry && i === g.els.length - 2) need(measure(() => { draw(el, i); draw(g.els[i + 1], i + 1); })); draw(el, i); }));
+    if (gi === 0) feedback();
+  });
   const code = resultsCode(fb ? st : { ...st, tname: "", feel: "", length: "", note: "" });
-  for (let i = 0; i < code.length; i += 100) { need(10); doc.text(code.slice(i, i + 100), X, y); y += 10; }
+  section(() => {
+    eyebrow("Results code for Yada");
+    font("courier", "normal", 7.5, SOFT);
+    for (let i = 0; i < code.length; i += 96) { put(() => doc.text(code.slice(i, i + 96), X, y)); y += 10; }
+  });
   const pages = doc.getNumberOfPages();
-  for (let i = 1; i <= pages; i++) { doc.setPage(i); style("helvetica", "normal", 8, SOFT); doc.text("Find yours: studio2918.github.io/yada  ·  A starting point, not a label.", X, H - 32); doc.text(`${i} of ${pages}`, X + MAX, H - 32, { align: "right" }); }
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); font("helvetica", "normal", 8, SOFT);
+    const linkText = "Find yours: studio2918.github.io/yada";
+    doc.textWithLink(linkText, X, H - 32, { url: SHARE_URL }); doc.text("  \u00b7  A Studio 2918 project", X + doc.getTextWidth(linkText), H - 32);
+    doc.text(`${i} of ${pages}`, X + MAX, H - 32, { align: "right" });
+  }
   const { flat, first } = shareSummary();
   doc.setProperties({ title: "My Yada results" });
   return new File([doc.output("blob")], flat ? "Yada results.pdf" : `Yada results - Type ${first}.pdf`, { type: "application/pdf" });
