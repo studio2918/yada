@@ -84,6 +84,11 @@ textarea { min-height: 70px; font-size: 14px; }
 .bar b { font-family: var(--display); font-size: 18px; font-weight: 400; }
 /* The tester box is a light card in both themes so it stands out from everything else. */
 .printonly { display: none; }
+.fbbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); pointer-events: none; }
+.fbbar[hidden] { display: none; }
+.fbbar button { pointer-events: auto; box-shadow: 0 6px 24px rgba(0, 0, 0, .3); padding: 12px 20px; max-width: 100%; font-size: 15px; white-space: nowrap; }
+.nudge { border: 1px solid color-mix(in srgb, var(--brand) 50%, transparent); background: color-mix(in srgb, var(--brand) 12%, var(--surface)); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.nudge[hidden] { display: none; }
 .invitebox { gap: 8px; margin-top: 6px; padding: 16px; border-radius: 12px; background: color-mix(in srgb, var(--brand) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--brand) 50%, transparent); }
 .invitebox h3 { color: var(--ink); }
 button.linkish { background: none; border: 0; padding: 0; border-radius: 0; color: var(--brand); font-weight: 500; text-align: left; text-decoration: underline; text-underline-offset: 3px; }
@@ -840,6 +845,10 @@ ${person(b)}
     <span class="eyebrow">Share your results</span>
     <p>Send your full results as a PDF to a friend or your spouse, or save a copy for yourself.</p>
     <div class="row"><button type="button" id="shareresults">Share my results</button><button type="button" class="secondary" id="printresults">Save as PDF or print</button></div>
+    <div class="nudge" id="sharenudge" hidden>
+      <p><strong>Before you share:</strong> how well does this fit? It takes 30 seconds.</p>
+      <div class="row"><button type="button" id="nudgeadd">Add feedback</button><button type="button" class="secondary" id="nudgeskip">Share anyway</button></div>
+    </div>
     <span class="muted small" id="shared" role="status"></span>
     <label class="small" style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="nofeedback" ${st.noFeedback ? "checked" : ""}> Don't include my feedback</label>
     <div class="stack invitebox">
@@ -849,6 +858,7 @@ ${person(b)}
       <span class="muted small" id="invited" role="status"></span>
     </div>
   </div>`}
+  ${they ? "" : `<div class="fbbar noprint" id="fbbar" hidden><button type="button" id="fbbarbtn">Done reading? Tell us how it fits \u2193</button></div>`}
   <div class="row"><button type="button" class="secondary" id="back">Change my last answer</button><button type="button" class="secondary" id="restart">Start over</button></div>
   <p class="muted small">The Enneagram is a helpful lens, not a scientifically settled category. It describes how someone might be wired. It doesn't tell you their story.</p>
   <p class="printonly muted small">Yada type finder \u00b7 A Studio 2918 project \u00b7 ${SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "")} \u00b7 ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>`;
@@ -1180,7 +1190,23 @@ function inviteFriend() {
   if (!navigator.share) return copy();
   navigator.share({ title: "Yada type finder", text: FRIEND_INVITE, url: SHARE_URL }).catch((e) => { if (e.name !== "AbortError") copy(); });
 }
-function shareResults(statusId) {
+// Feedback reminders: a floating bar once they're partway through, and a nudge if they share without any.
+const hasFeedback = () => !!(st.feel || st.note.trim() || st.sentAt);
+function updateFeedbackBar() {
+  const bar = document.getElementById("fbbar"), box = document.getElementById("sendpanel");
+  if (!bar || !box) return;
+  const read = (scrollY + innerHeight) / document.documentElement.scrollHeight;
+  bar.hidden = hasFeedback() || read < 0.4 || box.getBoundingClientRect().top < innerHeight;
+}
+function goToFeedback() {
+  const box = document.getElementById("sendpanel"); if (!box) return;
+  box.scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => document.getElementById("feel")?.focus({ preventScroll: true }), 500);
+}
+function shareResults(statusId, skipNudge) {
+  if (statusId === "shared" && !skipNudge && !hasFeedback() && !st.noFeedback) {
+    const n = document.getElementById("sharenudge"); n.hidden = false; n.scrollIntoView({ behavior: "smooth", block: "nearest" }); return;
+  }
   const status = document.getElementById(statusId), text = shareMessage();
   let file = null; try { if (window.jspdf?.jsPDF) file = resultsPdf(); } catch {}
   const saveFile = () => { if (!file) return false; const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.append(a); a.click(); a.remove(); return true; };
@@ -1201,7 +1227,11 @@ function wire() {
   if ($("#nofeedback")) $("#nofeedback").onchange = (e) => set({ noFeedback: e.target.checked });
   on("#printresults", () => window.print());
   on("#invitefriend", inviteFriend);
-  on("#tofeedback", () => $("#sendpanel").scrollIntoView({ behavior: "smooth", block: "start" }));
+  on("#tofeedback", goToFeedback);
+  on("#fbbarbtn", goToFeedback);
+  on("#nudgeadd", () => { $("#sharenudge").hidden = true; goToFeedback(); });
+  on("#nudgeskip", () => { $("#sharenudge").hidden = true; shareResults("shared", true); });
+  updateFeedbackBar();
   document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => set({ mode: b.dataset.mode }));
   if ($("#about")) $("#about").oninput = (e) => { st.about = e.target.value; save(); };
   if ($("#guess")) $("#guess").onchange = (e) => set({ guess: e.target.value, sure: Number(e.target.value) ? st.sure : "" });
@@ -1222,7 +1252,7 @@ function wire() {
   if ($("#translation")) $("#translation").onchange = (e) => set({ translation: e.target.value });
   if ($("#sure")) $("#sure").onchange = (e) => set({ sure: e.target.value });
   for (const id of ["tname", "note"]) if ($("#" + id)) $("#" + id).oninput = (e) => { st[id] = e.target.value; save(); };
-  if ($("#feel")) $("#feel").onchange = (e) => { st.feel = e.target.value; save(); };
+  if ($("#feel")) $("#feel").onchange = (e) => { st.feel = e.target.value; save(); updateFeedbackBar(); };
   if ($("#length")) $("#length").onchange = (e) => { st.length = e.target.value; save(); };
   if ($("#inbox")) $("#inbox").oninput = (e) => { inbox = e.target.value; try { localStorage.setItem(KEY + "-inbox", inbox); } catch {} };
   on("#tally", () => render());
@@ -1238,6 +1268,7 @@ function wire() {
 }
 
 window.addEventListener("hashchange", render);
+window.addEventListener("scroll", updateFeedbackBar, { passive: true });
 render();
 </script>
 
