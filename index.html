@@ -274,7 +274,7 @@ const BIBLE = {
   1: { who: "Paul", strengths: "Zeal, conviction, and discipline. He gave everything for what he believed was true.", refsS: "Philippians 3:4–6; 2 Timothy 4:7",
        struggles: "Before he met Jesus, his zeal turned harsh. He persecuted the church, sure he was right. Later he had a sharp falling-out with Barnabas.", refsW: "Galatians 1:13–14; Acts 15:39",
        used: "God turned his zeal into grace-filled mission. He carried the gospel across the Roman world and wrote much of the New Testament. “By the grace of God I am what I am.”", refsU: "1 Corinthians 15:10" },
-  2: { who: "Martha", strengths: "Warm hospitality and practical love. She opened her home to Jesus.", refsS: "Luke 10:38",
+  2: { who: "Martha", her: true, strengths: "Warm hospitality and practical love. She opened her home to Jesus.", refsS: "Luke 10:38",
        struggles: "Worried and distracted by serving, and resentful when no one helped: “Lord, do you not care?”", refsW: "Luke 10:40–41",
        used: "Jesus gently invited her to the one thing that matters. Later she made one of the clearest confessions of faith in the Gospels: “I believe that you are the Christ.”", refsU: "Luke 10:42; John 11:27" },
   3: { who: "Jacob", strengths: "Determined, resourceful, and persistent. He built a family and a fortune.", refsS: "Genesis 30–31",
@@ -299,6 +299,114 @@ const BIBLE = {
        struggles: "Going along to avoid conflict. Twice he passed his wife off as his sister rather than face a powerful king.", refsW: "Genesis 12:10–20; 20",
        used: "God called him to get up and go. He believed God, and it was counted to him as righteousness. He became the father of faith.", refsU: "Genesis 12:1–3; 15:6" },
 };
+
+// More people with each pattern, shown under "See others". Same shape as BIBLE; her: true for women.
+// Draft content: references only, paraphrased, awaiting the same review as the rest.
+const BIBLE_MORE = {
+  1: [
+    { who: "Ezra", strengths: "Devoted to getting it right. He set his heart to study God's law, live it, and teach it.", refsS: "Ezra 7:10",
+      struggles: "When he saw how far the people had drifted, he was so appalled he tore his clothes and sat stunned until evening.", refsW: "Ezra 9:3–4",
+      used: "God used his care for the truth to renew a people. When he read the law aloud, the people wept, then celebrated.", refsU: "Nehemiah 8:1–12" },
+    { who: "Elijah", strengths: "Uncompromising zeal for God. He stood alone against hundreds of false prophets.", refsS: "1 Kings 18:20–39",
+      struggles: "Right after his greatest victory he burned out, ran, and asked to die, sure he was the only faithful one left.", refsW: "1 Kings 19:3–4, 10",
+      used: "God didn't scold him. He gave him sleep and food, spoke in a gentle whisper, and showed him he wasn't alone.", refsU: "1 Kings 19:5–18" },
+    { who: "John the Baptist", strengths: "Uncompromising integrity. He called everyone to turn back to God, from crowds to kings.", refsS: "Matthew 3:1–12; 14:3–4",
+      struggles: "From prison, when Jesus didn't look like what he expected, he sent to ask if Jesus was really the one.", refsW: "Matthew 11:2–3",
+      used: "Jesus answered him gently with what He was doing, then said no one born of women was greater.", refsU: "Matthew 11:4–11" },
+  ],
+  2: [
+    { who: "Jonathan", strengths: "Generous, loyal love. He gave David his own robe, sword, and bow, and loved him as himself.", refsS: "1 Samuel 18:1–4",
+      struggles: "Caught between his father and his friend, he tried to keep the peace for everyone and paid for it in Saul's anger.", refsW: "1 Samuel 20:30–34",
+      used: "His kindness outlived him. Years later David cared for Jonathan's son because of the covenant between them.", refsU: "2 Samuel 9:1–7" },
+    { who: "Rebekah", her: true, strengths: "Quick, generous hospitality. She watered a stranger's camels without being asked.", refsS: "Genesis 24:18–20",
+      struggles: "Her love for one son turned into managing outcomes. She planned the deception that won Jacob the blessing.", refsW: "Genesis 25:28; 27:5–17",
+      used: "God had already promised what she tried to arrange, and He kept His word through her family anyway.", refsU: "Genesis 25:23; 28:13–15" },
+    { who: "Barnabas", strengths: "The son of encouragement. He sold a field to help others and vouched for Saul when everyone was afraid.", refsS: "Acts 4:36–37; 9:27",
+      struggles: "Wanting to keep everyone close, he went along with others' hypocrisy instead of standing apart.", refsW: "Galatians 2:13",
+      used: "His encouragement opened doors for Paul and later for Mark, and he helped lead the church in Antioch.", refsU: "Acts 11:22–26; 15:39" },
+  ],
+  3: [
+    { who: "Joseph", strengths: "Excellence wherever he landed: in Potiphar's house, in prison, and finally over all of Egypt.", refsS: "Genesis 39:2–4, 22; 41:41",
+      struggles: "As a young man he couldn't resist telling his brothers about dreams where they bowed to him.", refsW: "Genesis 37:5–11",
+      used: "God used his gifts to save many lives. He could tell his brothers that what they meant for evil, God meant for good.", refsU: "Genesis 50:20" },
+    { who: "Solomon", strengths: "Wise, accomplished, and admired. He built the temple and his wisdom drew people from other nations.", refsS: "1 Kings 3:12; 6; 10:1–9",
+      struggles: "He kept adding: more projects, more wealth, more wives. In time his heart turned away from God.", refsW: "1 Kings 11:1–4; Ecclesiastes 2:4–11",
+      used: "His own search taught what achievement can't give, and he pointed back to the one thing that lasts: fear God and keep His commands.", refsU: "Ecclesiastes 12:13" },
+    { who: "Zacchaeus", strengths: "Driven and resourceful. He rose to chief tax collector and wouldn't let a crowd keep him from seeing Jesus.", refsS: "Luke 19:2–4",
+      struggles: "He got ahead by cutting corners and taking more than was fair.", refsW: "Luke 19:7–8",
+      used: "Jesus came to his house first. He gave half of what he had to the poor and repaid those he'd cheated four times over.", refsU: "Luke 19:5–10" },
+  ],
+  4: [
+    { who: "David", strengths: "A poet and musician with deep feeling. Much of the Psalms' honesty comes from him.", refsS: "1 Samuel 16:23; 2 Samuel 23:1",
+      struggles: "Strong desire and strong sorrow. He took what wasn't his, and at times he was flooded with grief.", refsW: "2 Samuel 11; Psalm 6:6",
+      used: "His honest repentance became Psalm 51, and God called him a man after His own heart.", refsU: "Psalm 51; Acts 13:22" },
+    { who: "Hannah", her: true, strengths: "Honest, heartfelt prayer. She poured out her soul before the Lord.", refsS: "1 Samuel 1:10–15",
+      struggles: "Year after year she grieved what she didn't have, weeping and unable to eat.", refsW: "1 Samuel 1:6–8",
+      used: "God heard her and gave her Samuel. Her prayer of thanks became one of Scripture's great songs.", refsU: "1 Samuel 1:20; 2:1–10" },
+    { who: "Naomi", her: true, strengths: "Deep love. Her daughters-in-law clung to her, and Ruth wouldn't leave her.", refsS: "Ruth 1:8–17",
+      struggles: "Grief that turned to bitterness. She told people to call her Mara, meaning bitter.", refsW: "Ruth 1:20–21",
+      used: "God restored what she thought was gone. Her grandson Obed became the grandfather of David.", refsU: "Ruth 4:14–17" },
+  ],
+  5: [
+    { who: "Nicodemus", strengths: "A thoughtful teacher who came to Jesus with real questions.", refsS: "John 3:1–4",
+      struggles: "Cautious. He came at night, and for a long time he stayed on the edges rather than speak up.", refsW: "John 3:2; 7:50–51",
+      used: "When it cost the most, he stepped forward, bringing spices and helping bury Jesus in the open.", refsU: "John 19:38–40" },
+    { who: "Daniel", strengths: "Insight and understanding. He studied, prayed, and saw what others missed.", refsS: "Daniel 1:17, 20; 9:2",
+      struggles: "Some of what he saw overwhelmed him. He was appalled, didn't understand, and lay sick for days.", refsW: "Daniel 8:27",
+      used: "God revealed mysteries through him, and kings trusted his wisdom across a lifetime in exile.", refsU: "Daniel 2:19–23, 48" },
+    { who: "Nathanael", strengths: "Honest and thoughtful. Jesus called him a man with nothing false in him.", refsS: "John 1:47",
+      struggles: "A skeptic at first: can anything good come out of Nazareth?", refsW: "John 1:46",
+      used: "Once he saw for himself, he made a bold confession: you are the Son of God.", refsU: "John 1:48–49" },
+  ],
+  6: [
+    { who: "Timothy", strengths: "Faithful and loyal. Paul said he had no one else like him who cared so genuinely.", refsS: "Philippians 2:20–22",
+      struggles: "Timidity. Paul had to remind him that God's Spirit is not one of fear.", refsW: "1 Corinthians 16:10–11; 2 Timothy 1:7",
+      used: "God trusted him with leading the church in Ephesus, and two letters of Scripture are addressed to him.", refsU: "1 Timothy 1:3" },
+    { who: "Esther", her: true, strengths: "Loyal to her people and wise about when and how to act.", refsS: "Esther 2:10; 5:1–8",
+      struggles: "Fear. At first she hesitated, because going to the king uninvited could cost her life.", refsW: "Esther 4:11",
+      used: "She chose courage for such a time as this, and her people were saved.", refsU: "Esther 4:14–16; 8:3–8" },
+    { who: "Joshua", strengths: "Loyal and faithful. He stayed close to Moses and trusted God when others were afraid.", refsS: "Exodus 33:11; Numbers 14:6–9",
+      struggles: "He needed to hear it again and again: be strong and courageous, do not be afraid.", refsW: "Joshua 1:6–9",
+      used: "God was with him as He had been with Moses, and he led Israel into the promised land.", refsU: "Joshua 1:5; 21:43–45" },
+  ],
+  7: [
+    { who: "John Mark", strengths: "Eager and ready to go. He joined Paul and Barnabas on their first missionary journey.", refsS: "Acts 12:25",
+      struggles: "When the journey got hard, he left and went home, and Paul didn't want to take him again.", refsW: "Acts 13:13; 15:37–38",
+      used: "He came back. Paul later called him very useful, and the Gospel of Mark is traditionally credited to him.", refsU: "2 Timothy 4:11" },
+    { who: "Samson", strengths: "Bold, full of life, and remarkably strong when the Spirit came on him.", refsS: "Judges 14:6; 15:14–15",
+      struggles: "He chased whatever looked good to him, and his impulses led him into Delilah's trap.", refsW: "Judges 14:3; 16:4–21",
+      used: "In the end he prayed, God remembered him, and Scripture lists him among the heroes of faith.", refsU: "Judges 16:28–30; Hebrews 11:32" },
+    { who: "Miriam", her: true, strengths: "Joyful and celebratory. She led the women in dancing with a tambourine after God's rescue at the sea.", refsS: "Exodus 15:20–21",
+      struggles: "Under strain she turned critical and complained against Moses.", refsW: "Numbers 12:1–2",
+      used: "God restored her, and Scripture names her alongside Moses and Aaron as one He sent to lead His people.", refsU: "Numbers 12:13–15; Micah 6:4" },
+  ],
+  8: [
+    { who: "Nehemiah", strengths: "Took charge and got it done. He organized the builders and faced down opposition.", refsS: "Nehemiah 2:17–18; 4:16–18",
+      struggles: "His intensity could boil over. He confronted some offenders by pulling out their hair.", refsW: "Nehemiah 13:25",
+      used: "The walls of Jerusalem went up in 52 days, and even the enemies saw that God had done it.", refsU: "Nehemiah 6:15–16" },
+    { who: "John (son of Zebedee)", strengths: "Bold and zealous. Jesus nicknamed him and his brother Sons of Thunder.", refsS: "Mark 3:17",
+      struggles: "He wanted to call down fire on a village that turned Jesus away, and asked for a seat of power.", refsW: "Luke 9:54; Mark 10:35–37",
+      used: "Jesus trusted him with His own mother, and John became the apostle who wrote most about love.", refsU: "John 19:26–27; 1 John 4:7–8" },
+    { who: "Deborah", her: true, strengths: "A decisive leader. She judged Israel and called Barak to battle.", refsS: "Judges 4:4–7",
+      struggles: "Her strength made others lean on her. Barak wouldn't go into battle unless she went too.", refsW: "Judges 4:8–9",
+      used: "God gave the victory, her song praised Him for it, and the land had peace for forty years.", refsU: "Judges 5:1–31" },
+  ],
+  9: [
+    { who: "Aaron", strengths: "A steady supporter. He spoke for Moses and held up his arms through a long battle.", refsS: "Exodus 4:14–16; 17:12",
+      struggles: "Going along with the crowd. When the people pushed, he made the golden calf.", refsW: "Exodus 32:1–4, 21–24",
+      used: "God made him the first high priest, and gave him the blessing still spoken today: the Lord bless you and keep you.", refsU: "Numbers 6:22–27" },
+    { who: "Isaac", strengths: "Peaceable. When others fought over his wells, he moved on and dug new ones.", refsS: "Genesis 26:17–22",
+      struggles: "Passive in his own home. Favoritism and avoidance left room for deception.", refsW: "Genesis 25:28; 27",
+      used: "God met him and said, I am with you. He carried the promise to the next generation.", refsU: "Genesis 26:24" },
+    { who: "Eli", strengths: "Gentle and patient. He taught young Samuel how to listen for God.", refsS: "1 Samuel 3:8–10",
+      struggles: "Too passive to confront his own sons when they did wrong.", refsW: "1 Samuel 2:22–25; 3:13",
+      used: "Through his guidance Samuel learned to say: speak, Lord, your servant is listening.", refsU: "1 Samuel 3:10, 19–20" },
+  ],
+};
+const person = (b) => `
+      <p><strong>Strengths:</strong> ${h(b.strengths)} <span class="muted small">(${b.refsS})</span></p>
+      <p><strong>Struggles:</strong> ${h(b.struggles)} <span class="muted small">(${b.refsW})</span></p>
+      <p><strong>How God used ${b.her ? "her" : "him"}:</strong> ${h(b.used)} <span class="muted small">(${b.refsU})</span></p>`;
 
 // A four-week cycle for each type: who you are in Christ, a memory verse, and
 // a breath prayer. Verses are King James (public domain) for this prototype.
@@ -679,11 +787,10 @@ function result() {
     </div>
     <div class="panel"><span class="eyebrow">Someone in Scripture with a similar pattern</span>
       <h3>${b.who}</h3>
-      <p><strong>Strengths:</strong> ${h(b.strengths)} <span class="muted small">(${b.refsS})</span></p>
-      <p><strong>Struggles:</strong> ${h(b.struggles)} <span class="muted small">(${b.refsW})</span></p>
-      <p><strong>How God used ${b.who === "Martha" ? "her" : "him"}:</strong> ${h(b.used)} <span class="muted small">(${b.refsU})</span></p>
+${person(b)}
+      <div id="moreppl" hidden>${BIBLE_MORE[first].map((o) => `<div class="stack" style="gap:8px;border-top:1px solid var(--line);padding-top:14px;margin-top:4px"><h3>${o.who}</h3>${person(o)}</div>`).join("")}</div>
       <p class="muted small">We can't know anyone's type for certain, including people in the Bible. These are patterns we can see in their stories.</p>
-      <div class="row"><button type="button" class="secondary" id="tobible">See all nine</button></div>
+      <div class="row" style="justify-content:space-between"><button type="button" class="secondary" id="seeothers" aria-expanded="false" aria-controls="moreppl">See others</button><button type="button" class="secondary" id="tobible" style="margin-left:auto">See all nine</button></div>
     </div>`; })()}
   <div class="panel"><span class="eyebrow">How the pieces fit</span>
     <p>Enneagram teachers describe ${an(first)} moving toward <strong>${stress}</strong> under stress and toward <strong>${growth}</strong> when growing, with <strong>${wings.join(" or ")}</strong> as neighboring types.</p>
@@ -836,9 +943,8 @@ function bibleView() {
     <p class="muted">Each of these people had real gifts and real struggles, and God used them for His glory. We can't know anyone's type for certain, including people in the Bible. These are patterns we can see in their stories.</p>
   </section>
   ${TYPES.map((n) => { const b = BIBLE[n]; return `<div class="panel"><span class="eyebrow">Type ${n} \u00b7 ${T[n].name}</span><h3>${b.who}</h3>
-    <p><strong>Strengths:</strong> ${h(b.strengths)} <span class="muted small">(${b.refsS})</span></p>
-    <p><strong>Struggles:</strong> ${h(b.struggles)} <span class="muted small">(${b.refsW})</span></p>
-    <p><strong>How God used ${["Martha"].includes(b.who) ? "her" : "him"}:</strong> ${h(b.used)} <span class="muted small">(${b.refsU})</span></p></div>`; }).join("")}
+${person(b)}
+    <p class="muted small">Others with this pattern: ${BIBLE_MORE[n].map((o) => o.who).join(", ")}</p></div>`; }).join("")}
   <div class="row"><button type="button" id="toquiz">Back</button></div>`;
 }
 
@@ -1124,6 +1230,7 @@ function wire() {
       .catch(() => { $("#invitecopied").textContent = "Couldn't copy here. Here's the message:"; $("#invitecopied").insertAdjacentHTML("afterend", `<code class="share">${h(INVITE)}</code>`); });
   });
   on("#toabout", () => { location.hash = "about"; window.scrollTo(0, 0); });
+  on("#seeothers", () => { const m = $("#moreppl"), b = $("#seeothers"); m.hidden = !m.hidden; b.textContent = m.hidden ? "See others" : "Show fewer"; b.setAttribute("aria-expanded", String(!m.hidden)); });
   on("#tobible", () => { location.hash = "bible"; window.scrollTo(0, 0); });
   on("#toquiz", () => { history.replaceState(null, "", location.pathname); render(); });
 }
