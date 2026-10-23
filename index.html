@@ -84,6 +84,7 @@ textarea { min-height: 70px; font-size: 14px; }
 .bar b { font-family: var(--display); font-size: 18px; font-weight: 400; }
 /* The tester box is a light card in both themes so it stands out from everything else. */
 .printonly { display: none; }
+button.linkish { background: none; border: 0; padding: 0; border-radius: 0; color: var(--brand); font-weight: 500; text-align: left; text-decoration: underline; text-underline-offset: 3px; }
 .callout { --surface: #fff; --ink: #2d2620; --ink-soft: #5f554b; --line: #e3d9cb; --brand: #6b4f2e; --brand-ink: #fffaf0; --focus: #2f5c7c;
   color-scheme: light; color: var(--ink); background: #fffaf0; border: 2px solid #d9bf94; box-shadow: 0 8px 28px rgba(201, 167, 122, .35); padding: 24px 20px; }
 .callout h2 { font-size: 30px; }
@@ -517,7 +518,7 @@ const SHARE_URL = "https://studio2918.github.io/yada/";
 const FEEDBACK_KEY = "";
 const INVITE = `Hey! I'm building an app called Yada and would love your help testing one piece of it. It's a short Enneagram test (about 10 minutes): ${SHARE_URL}
 
-When you get your result, fill in the "Helping test this?" box right under it, tap "Share my results," and send it to me. Honest feedback helps the most, especially if the result feels wrong!`;
+When you finish, read through your result, fill in the "Does this sound like you?" box near the end, tap "Share my results," and send it to me. Honest feedback helps the most, especially if the result feels wrong!`;
 let isOwner = false;
 (async () => {
   try { const u = await window.claude?.use?.("user"); if (u && await u.isOwner()) { isOwner = true; render(); } } catch {}
@@ -626,32 +627,8 @@ function result() {
     <span class="eyebrow">${they ? `Your view of ${h(who())}` : "Your likely type"} · still exploring</span>
     <h1>${flat ? "No type stood out yet" : `Type ${first}, ${T[first].name}`}</h1>
     <p class="muted">${flat ? `${they ? "Their" : "Your"} answers were very even across all nine types, so the types below are only a loose starting point.` : how} ${count} answers in all.</p>
-    ${they ? "" : `<div class="row noprint"><button type="button" id="shareresults">Share my results</button><button type="button" class="secondary" id="printresults">Save as PDF or print</button><span class="muted small" id="shared" role="status"></span></div>
-    <label class="small noprint" style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="nofeedback" ${st.noFeedback ? "checked" : ""}> Don't include my feedback</label>`}
+    ${they ? "" : `<p class="small noprint"><button type="button" class="linkish" id="tofeedback">Read through your results, then tell us how well they fit \u2193</button></p>`}
   </section>
-  ${they ? "" : `<div class="panel noprint callout" id="sendpanel">
-    <span class="eyebrow">For testers</span>
-    <h2>Helping test this?</h2>
-    <p><strong>Your honest feedback is the most helpful part</strong>, especially if the result feels wrong. Answer a few quick questions, then tap <strong>${FEEDBACK_KEY ? "Send to the Yada team" : "Share my results"}</strong> to send your results and feedback${FEEDBACK_KEY ? "" : " to the person who shared this link"}.</p>
-    <label for="tname">Your first name or initials</label>
-    <input type="text" id="tname" value="${h(st.tname)}" placeholder="J.G.">
-    <label for="feel">Does the result feel right?</label>
-    <select id="feel">${[["", "Choose one"], ["1", "Not at all"], ["2", "Partly"], ["3", "Mostly"], ["4", "Spot on"]].map(([v, l]) => `<option value="${v}" ${st.feel === v ? "selected" : ""}>${l}</option>`).join("")}</select>
-    <label for="length">How did the length feel?</label>
-    <select id="length">${LENGTH.map((l, i) => i ? [String(i), l] : ["", "Choose one"]).map(([v, l]) => `<option value="${v}" ${(st.length || "") === v ? "selected" : ""}>${l}</option>`).join("")}</select>
-    <label for="note" class="fblabel">Your feedback</label>
-    <p class="small muted" style="margin-top:-8px">What felt off, confusing, or right on? A statement that was hard to answer, a result that doesn't fit, anything that would make this better.</p>
-    <textarea id="note" placeholder="Type your feedback here">${h(st.note)}</textarea>
-    <label for="guess">Before today, what did you think your type was?</label>
-    <select id="guess">${[["", "Choose one"], ["0", "I had no idea"], ...TYPES.map((n) => [String(n), `${n}, ${T[n].name}`])].map(([v, l]) => `<option value="${v}" ${String(st.guess) === v ? "selected" : ""}>${l}</option>`).join("")}</select>
-    ${guess ? `<label for="sure">How sure were you?</label>
-    <select id="sure">${[["", "Choose one"], ["1", "Just a guess"], ["2", "Fairly sure"], ["3", "Very sure"]].map(([v, l]) => `<option value="${v}" ${st.sure === v ? "selected" : ""}>${l}</option>`).join("")}</select>
-    <p class="note">${guess === first ? `That matches what the finder found.` : top.includes(guess) ? `Type ${guess} is in your top three. Compare its gift and hard part with Type ${first}'s and see which feels more like home.` : `The finder set Type ${guess} aside along the way. Read its gift and hard part again; it may fit a different season of your life, or the finder may have missed. Both happen.`}</p>` : st.guess === "0" ? `<p class="muted small">That's common. Give this result a few weeks and see if it keeps fitting.</p>` : ""}
-    ${FEEDBACK_KEY ? `<div class="row"><button type="button" id="sendteam">${st.sentAt ? "Send an update" : "Send to the Yada team"}</button><button type="button" class="secondary" id="shareresults2">Share my results</button></div>
-    <p class="muted small" id="sendstatus" role="status">${st.sentAt ? "Sent. Thank you! If you change anything, you can send an update." : "Emails your results and feedback to the Yada team. Nothing is sent unless you tap."}</p>
-    <span class="muted small" id="copiedresults" role="status"></span>`
-    : `<div class="row"><button type="button" id="shareresults2">Share my results</button><span class="muted small" id="copiedresults" role="status"></span></div>`}
-  </div>`}
   ${flat ? `<p class="note small">That's common when every statement feels \u201csometimes true.\u201d Try again picturing one specific season, or have someone who knows ${they ? "them" : "you"} well take it about ${they ? "them" : "you"}.</p>` : ""}
   <div class="panel"><span class="eyebrow">How it narrowed down</span>
     <p class="small"><strong>Set aside after round 1:</strong> ${p.out1.length ? p.out1.join(", ") : "none"}</p>
@@ -727,6 +704,36 @@ function result() {
     <p>Your top three: <strong>${top.join(", ")}</strong>. Theirs: <strong>${theirTop.join(", ")}</strong>.</p>
     <p class="muted">${theirTop[0] === first ? "You both put the same type first." : `They put Type ${theirTop[0]} first. That's worth a gentle conversation, not a ruling.`}</p></div>`
     : st.otherCode.trim() ? `<p class="note small">That code doesn't look right. It should look like Y5-713.</p>` : ""}
+  ${they ? "" : `<div class="panel noprint callout" id="sendpanel">
+    <span class="eyebrow">Your feedback</span>
+    <h2>Does this sound like you?</h2>
+    <p>Tell us honestly how well it fits, <strong>especially if something feels off</strong>. Then tap <strong>${FEEDBACK_KEY ? "Send to the Yada team" : "Share my results"}</strong> to send it.</p>
+    <label for="tname">Your first name or initials</label>
+    <input type="text" id="tname" value="${h(st.tname)}" placeholder="J.G.">
+    <label for="feel">How well does the result fit?</label>
+    <select id="feel">${[["", "Choose one"], ["1", "Not at all"], ["2", "Partly"], ["3", "Mostly"], ["4", "Spot on"]].map(([v, l]) => `<option value="${v}" ${st.feel === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <label for="length">How did the length feel?</label>
+    <select id="length">${LENGTH.map((l, i) => i ? [String(i), l] : ["", "Choose one"]).map(([v, l]) => `<option value="${v}" ${(st.length || "") === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <label for="note" class="fblabel">Your feedback</label>
+    <p class="small muted" style="margin-top:-8px">What felt off, confusing, or right on? A statement that was hard to answer, a result that doesn't fit, anything that would make this better.</p>
+    <textarea id="note" placeholder="Type your feedback here">${h(st.note)}</textarea>
+    <label for="guess">Before today, what did you think your type was?</label>
+    <select id="guess">${[["", "Choose one"], ["0", "I had no idea"], ...TYPES.map((n) => [String(n), `${n}, ${T[n].name}`])].map(([v, l]) => `<option value="${v}" ${String(st.guess) === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    ${guess ? `<label for="sure">How sure were you?</label>
+    <select id="sure">${[["", "Choose one"], ["1", "Just a guess"], ["2", "Fairly sure"], ["3", "Very sure"]].map(([v, l]) => `<option value="${v}" ${st.sure === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <p class="note">${guess === first ? `That matches what the finder found.` : top.includes(guess) ? `Type ${guess} is in your top three. Compare its gift and hard part with Type ${first}'s and see which feels more like home.` : `The finder set Type ${guess} aside along the way. Read its gift and hard part again; it may fit a different season of your life, or the finder may have missed. Both happen.`}</p>` : st.guess === "0" ? `<p class="muted small">That's common. Give this result a few weeks and see if it keeps fitting.</p>` : ""}
+    ${FEEDBACK_KEY ? `<div class="row"><button type="button" id="sendteam">${st.sentAt ? "Send an update" : "Send to the Yada team"}</button><button type="button" class="secondary" id="shareresults2">Share my results</button></div>
+    <p class="muted small" id="sendstatus" role="status">${st.sentAt ? "Sent. Thank you! If you change anything, you can send an update." : "Emails your results and feedback to the Yada team. Nothing is sent unless you tap."}</p>
+    <span class="muted small" id="copiedresults" role="status"></span>`
+    : `<div class="row"><button type="button" id="shareresults2">Share my results</button><span class="muted small" id="copiedresults" role="status"></span></div>`}
+  </div>`}
+  ${they ? "" : `<div class="panel noprint" id="sharepanel">
+    <span class="eyebrow">Share your results</span>
+    <p>Send your full results as a PDF to a friend or your spouse, or save a copy for yourself.</p>
+    <div class="row"><button type="button" id="shareresults">Share my results</button><button type="button" class="secondary" id="printresults">Save as PDF or print</button></div>
+    <span class="muted small" id="shared" role="status"></span>
+    <label class="small" style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="nofeedback" ${st.noFeedback ? "checked" : ""}> Don't include my feedback</label>
+  </div>`}
   <div class="row"><button type="button" class="secondary" id="back">Change my last answer</button><button type="button" class="secondary" id="restart">Start over</button></div>
   <p class="muted small">The Enneagram is a helpful lens, not a scientifically settled category. It describes how someone might be wired. It doesn't tell you their story.</p>
   <p class="printonly muted small">Yada type finder \u00b7 A Studio 2918 project \u00b7 ${SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "")} \u00b7 ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>`;
@@ -985,7 +992,7 @@ function resultsPdf() {
       eyebrow("My feedback");
       const row = (lead, val) => para({ text: `${lead} ${val}`, lead, after: 4 });
       if (st.tname.trim()) row("From:", st.tname.trim());
-      if (st.feel) row("Does the result feel right?", FEEL[st.feel]);
+      if (st.feel) row("How well does the result fit?", FEEL[st.feel]);
       if (st.length) row("How did the length feel?", LENGTH[st.length]);
       if (note) row("Feedback:", note);
       if (st.guess) row("Before today I thought I was:", Number(st.guess) ? `${st.guess}, ${T[st.guess].name}${st.sure ? ` (${["", "just a guess", "fairly sure", "very sure"][st.sure]})` : ""}` : "I had no idea");
@@ -1036,7 +1043,7 @@ function sendToTeam() {
       subject: `Yada tester: ${name} \u2013 ${flat ? "no clear type" : `Type ${first}`}${st.feel ? `, feels ${FEEL[st.feel].toLowerCase()}` : ""}`,
       "Tester": name,
       "Result": flat ? "No type stood out yet" : `Type ${first}, ${T[first].name} (also possible: ${runners.join(" and ")})`,
-      "Does it feel right?": FEEL[st.feel] || "(not answered)",
+      "How well does it fit?": FEEL[st.feel] || "(not answered)",
       "Length": LENGTH[st.length] || "(not answered)",
       "Feedback": note || "(none)",
       "Thought their type was": Number(st.guess) ? `${st.guess}, ${T[st.guess].name}${st.sure ? ` (${SURE[st.sure]})` : ""}` : st.guess === "0" ? "No idea" : "(not answered)",
@@ -1069,6 +1076,7 @@ function wire() {
   on("#sendteam", sendToTeam);
   if ($("#nofeedback")) $("#nofeedback").onchange = (e) => set({ noFeedback: e.target.checked });
   on("#printresults", () => window.print());
+  on("#tofeedback", () => $("#sendpanel").scrollIntoView({ behavior: "smooth", block: "start" }));
   document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => set({ mode: b.dataset.mode }));
   if ($("#about")) $("#about").oninput = (e) => { st.about = e.target.value; save(); };
   if ($("#guess")) $("#guess").onchange = (e) => set({ guess: e.target.value, sure: Number(e.target.value) ? st.sure : "" });
