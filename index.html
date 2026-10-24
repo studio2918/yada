@@ -104,6 +104,9 @@ details.panel.more > summary { color: var(--ink); font-family: var(--display); f
 .breath { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: baseline; }
 .breath strong { font-family: var(--display); font-weight: 400; font-size: 21px; }
 .aboutnote { background: transparent; }
+.aboutq { display: flex; flex-direction: column; gap: 8px; }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 460px; }
+.seg .chipbtn { width: 100%; min-height: 44px; padding: 8px 6px; font-size: 15px; border-radius: 12px; text-align: center; line-height: 1.2; }
 main:has(.fbbar) { padding-bottom: 110px; }
 /* The tester box is a light card in both themes so it stands out from everything else. */
 .printonly { display: none; }
@@ -627,11 +630,11 @@ function intro() {
       <li>As you answer, types that don't fit get set aside. At the end, the last few go head to head.</li>
     </ol>
   </div>
-  <section class="stack" id="aboutstart">
+  <div class="panel" id="aboutstart">
     <span class="eyebrow">About you \u00b7 optional</span>
     <p class="muted small">This helps Yada show the relationship guidance that fits your life. Skip anything you'd rather not answer; you can change it later.</p>
     ${aboutQuestionsHTML()}
-  </section>
+  </div>
   <div class="row"><button type="button" id="start">${started ? "Continue" : "Start"}</button>${started ? `<button type="button" class="secondary" id="reset">Start over</button>` : ""}</div>`;
 }
 
@@ -1064,7 +1067,7 @@ function selfView(kind) {
 }
 // About you: optional, and only used where it changes what's shown.
 const EXPLORE = [["marriage", "Marriage"], ["parenting", "Parenting"], ["friendship", "Friendship"], ["leadership", "Leadership"], ["employer", "Employer responsibilities"], ["employee", "Employee relationships"]];
-const wants = (k) => !(st.explore || []).length || (st.explore || []).includes(k);
+const wants = (k) => true;  // the explore question is set aside for now, so no area is hidden
 function relKindsShown() {
   return Object.keys(REL_KINDS).filter((k) => ({ spouse: wants("marriage") && st.married !== "n", friend: wants("friendship"), coworker: wants("employee"), boss: wants("employee"), report: wants("employer") || wants("leadership") })[k]);
 }
@@ -1073,14 +1076,13 @@ function aboutYouHTML() {
     <div style="margin-top:10px">${aboutQuestionsHTML()}</div></details>`;
 }
 function aboutQuestionsHTML() {
+  // "Which relationships would you like to explore?" is set aside for now (2026-10-24); see wants().
   const chip = (field, v, label) => `<button type="button" class="chipbtn" data-about="${field}" data-aboutval="${v}" aria-pressed="${st[field] === v}">${label}</button>`;
-  const ask = (q, field, opts) => `<div class="stack" style="gap:6px"><span class="small"><strong>${q}</strong></span><div class="chips2">${opts.map(([v, l]) => chip(field, v, l)).join("")}</div></div>`;
-  return `<div class="stack" style="gap:12px">
+  const ask = (q, field, opts) => `<div class="aboutq" role="group" aria-label="${q}"><span class="small"><strong>${q}</strong></span><div class="seg">${opts.map(([v, l]) => chip(field, v, l)).join("")}</div></div>`;
+  return `<div class="stack" style="gap:16px">
+      ${ask("Are you a man or a woman?", "gender", [["m", "A man"], ["f", "A woman"], ["x", "Prefer not to say"]])}
       ${ask("Are you married?", "married", [["y", "Married"], ["n", "Not married"], ["x", "Prefer not to say"]])}
       ${ask("Do you have children?", "kids", [["y", "Yes"], ["n", "No"], ["x", "Prefer not to say"]])}
-      <div class="stack" style="gap:6px"><span class="small"><strong>Which relationships would you like to explore?</strong> <span class="muted">Choose any.</span></span>
-        <div class="chips2">${EXPLORE.map(([k, l]) => `<button type="button" class="chipbtn" data-explore="${k}" aria-pressed="${(st.explore || []).includes(k)}">${l}</button>`).join("")}</div></div>
-      ${ask("You are:", "gender", [["m", "A man"], ["f", "A woman"], ["x", "Prefer not to say"]])}
     </div>`;
 }
 function relPanelHTML() {
