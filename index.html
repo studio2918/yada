@@ -465,7 +465,7 @@ const DUEL_WEIGHT = 0.1;       // each head-to-head win or loss moves a finalist
 const DUEL_CAP = 0.3;          // the final round can move a finalist at most this much either way
 
 const KEY = "yada-type-finder-v6";
-let st = load() || fresh();
+let st = (() => { const o = load(); return o && o.mode !== "other" ? o : fresh(); })();  // answers given about someone else (no longer offered) start fresh
 function fresh() { return { translation: "NIV", step: "intro", mode: "self", about: "", guess: "", sure: "", ans: {}, duel: {}, history: [], otherCode: "", tname: "", feel: "", length: "", note: "" }; }
 const LENGTH = ["", "Too short", "About right", "Too long"];
 const ABOUT_LABELS = { married: { y: "Married", n: "Not married", x: "Prefers not to say" }, kids: { y: "Has children", n: "No children", x: "Prefers not to say" }, gender: { m: "Man", f: "Woman", x: "Prefers not to say" } };
@@ -566,7 +566,8 @@ const decodeTop = (code) => { const m = /^Y5-([1-9]{3})$/.exec(code.trim()); ret
 
 const an = (n) => (n === 8 ? "an " : "a ") + n;
 const h = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const other = () => st.mode === "other";
+// The finder is only taken about yourself (2026-10-24): no one takes the Enneagram on someone else's behalf.
+const other = () => false;
 const who = () => other() ? (st.about.trim() || "them") : "you";
 
 function render() {
@@ -626,15 +627,11 @@ function intro() {
       <li>As you answer, types that don't fit get set aside. At the end, the last few go head to head.</li>
     </ol>
   </div>
-  <section class="stack">
-    <span class="eyebrow">Who is this about?</span>
-    <div class="modes">
-      <button type="button" class="mode" data-mode="self" aria-pressed="${!other()}"><strong>Me</strong><span class="muted small">Find your own likely type.</span></button>
-      <button type="button" class="mode" data-mode="other" aria-pressed="${other()}"><strong>Someone I know</strong><span class="muted small">Answer for a spouse or friend to understand them better.</span></button>
-    </div>
+  <section class="stack" id="aboutstart">
+    <span class="eyebrow">About you \u00b7 optional</span>
+    <p class="muted small">This helps Yada show the relationship guidance that fits your life. Skip anything you'd rather not answer; you can change it later.</p>
+    ${aboutQuestionsHTML()}
   </section>
-  ${other() ? `<p class="note small">You can observe another person\u2019s behavior, but you cannot know their deepest motivations without listening to them. Treat these results as possibilities to discuss, not conclusions about who they are.</p>` : ""}
-  ${other() ? `<section class="stack"><label for="about">Their first name</label><input type="text" id="about" value="${h(st.about)}" placeholder="Sarah"></section>` : ""}
   <div class="row"><button type="button" id="start">${started ? "Continue" : "Start"}</button>${started ? `<button type="button" class="secondary" id="reset">Start over</button>` : ""}</div>`;
 }
 
@@ -733,7 +730,7 @@ function result() {
     ${flat ? `<p class="muted">${they ? "Their" : "Your"} answers were very even across all nine types, so the types below are only a loose starting point.</p>` : ""}
     ${they ? "" : `<p class="small noprint"><button type="button" class="linkish" id="tofeedback">Read through your results, then tell us how well they fit ↓</button></p>`}
   </section>
-  ${flat ? `<p class="note small">That's common when every statement feels “sometimes true.” Try again picturing one specific season, or have someone who knows ${they ? "them" : "you"} well take it about ${they ? "them" : "you"}.</p>` : ""}
+  ${flat ? `<p class="note small">That's common when every statement feels “sometimes true.” Try again picturing one specific season of your life.</p>` : ""}
   ${jumps.length > 1 ? `<nav class="jump noprint" aria-label="Jump to a part of ${yo} results">${jumps.map(([id, l]) => `<button type="button" class="chipbtn" data-jump="${id}">${l}</button>`).join("")}</nav>` : ""}
 
   ${chapter("ch-you", 1, they ? `Knowing ${h(who())}` : "Know yourself", they ? "" : "Patterns to notice honestly, not a verdict about who you are.")}
@@ -1072,16 +1069,19 @@ function relKindsShown() {
   return Object.keys(REL_KINDS).filter((k) => ({ spouse: wants("marriage") && st.married !== "n", friend: wants("friendship"), coworker: wants("employee"), boss: wants("employee"), report: wants("employer") || wants("leadership") })[k]);
 }
 function aboutYouHTML() {
+  return `<details class="more"><summary><span>About you <span class="muted small">· change your answers</span></span></summary>
+    <div style="margin-top:10px">${aboutQuestionsHTML()}</div></details>`;
+}
+function aboutQuestionsHTML() {
   const chip = (field, v, label) => `<button type="button" class="chipbtn" data-about="${field}" data-aboutval="${v}" aria-pressed="${st[field] === v}">${label}</button>`;
   const ask = (q, field, opts) => `<div class="stack" style="gap:6px"><span class="small"><strong>${q}</strong></span><div class="chips2">${opts.map(([v, l]) => chip(field, v, l)).join("")}</div></div>`;
-  return `<details class="more"><summary><span>First, a little about you <span class="muted small">· optional</span></span></summary>
-    <div class="stack" style="gap:12px;margin-top:10px">
+  return `<div class="stack" style="gap:12px">
       ${ask("Are you married?", "married", [["y", "Married"], ["n", "Not married"], ["x", "Prefer not to say"]])}
       ${ask("Do you have children?", "kids", [["y", "Yes"], ["n", "No"], ["x", "Prefer not to say"]])}
       <div class="stack" style="gap:6px"><span class="small"><strong>Which relationships would you like to explore?</strong> <span class="muted">Choose any.</span></span>
         <div class="chips2">${EXPLORE.map(([k, l]) => `<button type="button" class="chipbtn" data-explore="${k}" aria-pressed="${(st.explore || []).includes(k)}">${l}</button>`).join("")}</div></div>
       ${ask("You are:", "gender", [["m", "A man"], ["f", "A woman"], ["x", "Prefer not to say"]])}
-    </div></details>`;
+    </div>`;
 }
 function relPanelHTML() {
   const show = (k) => relKindsShown().includes(k);
@@ -1456,8 +1456,6 @@ function wire() {
   on("#nudgeadd", () => { $("#sharenudge").hidden = true; goToFeedback(); });
   on("#nudgeskip", () => { $("#sharenudge").hidden = true; shareResults("shared", true); });
   updateFeedbackBar();
-  document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => set({ mode: b.dataset.mode }));
-  if ($("#about")) $("#about").oninput = (e) => { st.about = e.target.value; save(); };
   if ($("#guess")) $("#guess").onchange = (e) => set({ guess: e.target.value, sure: Number(e.target.value) ? st.sure : "" });
   on("#start", () => { set({ step: st.read ? "quiz" : "read" }); window.scrollTo(0, 0); });
   on("#ack", () => { set({ read: true, step: "quiz" }); window.scrollTo(0, 0); });
