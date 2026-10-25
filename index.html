@@ -775,7 +775,7 @@ function result() {
 
   ${flat ? "" : (() => { const d = DISC.types[first]; return `${chapter("ch-christ", 2, "Know Christ", h(DISC.intro.paras[DISC.intro.paras.length - 1]))}
   <div class="panel" id="discpanel"><span class="eyebrow">In light of Scripture</span>
-    <div class="stack" style="gap:6px"><span class="eyebrow soft">The world may tell you</span><p class="muted">${h(d.world)}</p></div>
+    <div class="stack" style="gap:6px"><span class="eyebrow soft">The world may tell you</span><p class="muted" style="font-style:italic">“${h(d.world)}”</p></div>
     <div class="stack word" style="gap:6px"><span class="eyebrow">What Scripture teaches</span><p>${h(d.scripture.text)}</p><p class="muted small">${h(d.scripture.refs)}</p></div>
     <div class="stack" style="gap:6px"><span class="eyebrow">Where Christ calls ${they ? "them" : "you"} to grow</span><p>${h(d.grow)}</p></div>
     <p class="note"><strong>A question for ${they ? "the heart" : "your heart"}:</strong> ${h(d.heart)}</p>
@@ -1140,7 +1140,7 @@ const life = (l) => `<h3>${h(l.who)}</h3><p class="muted small" style="margin-to
 const formPara = (p) => typeof p === "string" ? `<p>${h(p)}</p>` : `<ul class="formlist">${p.list.map((x) => `<li>${x.term ? `<strong>${h(x.term)}:</strong> ` : ""}${h(x.text)}</li>`).join("")}</ul>`;
 const formDeeper = (n) => { const F = DISC.formation.types[n]; return `<details class="fric"><summary>Go deeper: what may be shaping you</summary><div class="stack" style="gap:8px;margin-top:10px">
   <p class="small muted">Stories some people tell themselves, worth examining. They aren't conclusions about you.</p>
-  ${F.stories.map((x) => `<div class="cbox"><p class="small"><strong>\u201c${h(x.story)}\u201d</strong></p><p class="small">${h(x.truth)}</p><p class="muted small">${h(x.refs)}</p></div>`).join("")}
+  ${F.stories.map((x) => `<div class="cbox"><p class="small muted" style="font-style:italic">\u201c${h(x.story)}\u201d</p><p class="small">${h(x.truth)}</p><p class="muted small">${h(x.refs)}</p></div>`).join("")}
   <p class="small"><strong>When a good thing takes the wrong place:</strong> ${h(F.love.text)} <span class="muted">${h(F.love.refs)}</span></p>
   <p class="small"><a href="#grow">How we grow: habits, rest and Sabbath, practices, and community \u2192</a></p></div></details>`; };
 function growView() {
