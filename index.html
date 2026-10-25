@@ -67,7 +67,15 @@ textarea { min-height: 70px; font-size: 14px; }
 .alt button[aria-pressed="true"] { background: var(--ink-soft); border-color: var(--ink-soft); color: var(--bg); }
 .rate { display: grid; grid-template-columns: 1fr; gap: 8px; }
 .rate button { font-weight: 700; font-size: 16px; padding: 13px 16px; text-align: left; background: transparent; color: var(--ink-soft); border-color: var(--line); }
-.rate button[aria-pressed="true"] { background: var(--pick); border-color: var(--pick); color: var(--bg); }
+.rate button[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+/* A tapped answer fills in (the same gold as the "About you" choices) for a moment before the next question, so a mis-tap is noticed. */
+.picking button:not(.just) { opacity: .45; }
+.picking { pointer-events: none; }
+/* The next question eases in, so each one reads as a new step. */
+@keyframes qin { from { opacity: 0; transform: translateY(6px); } }
+.statement, .versus { animation: qin .3s ease-out; }
+@media (prefers-reduced-motion: reduce) { .statement, .versus { animation: none; } }
+.rate button.just, .side.just, .alt button.just { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); box-shadow: none; }
 .statement { font-family: var(--display); font-size: 26px; line-height: 1.35; text-wrap: balance; min-height: 3.2em; }
 .stages { display: flex; gap: 6px; }
 .stages span { flex: 1; height: 6px; border-radius: 99px; background: var(--line); }
@@ -217,7 +225,7 @@ code.share { user-select: all; -webkit-user-select: all; display: block; font-si
 
 <script>
 // Ten everyday statements per type, alternating a good day and a hard day.
-// The first two of each type are asked of everyone; the rest only if that
+// The first three of each type are asked of everyone; the rest only if that
 // type is still in the running.
 const BANK = {
   1: ["I notice how things could be done better, and I like improving them.", "I'm hard on myself when I make a mistake.",
@@ -282,7 +290,8 @@ const CORE = {
 // Struggle lines for the final round, written to be equally hard to admit.
 // Round 1 asks about a gift; rounds 2 and 3 ask about struggles.
 const STRUGGLE = {"1": ["I get critical of myself and others when things aren't done right.", "I hold in my frustration until it comes out sideways."], "2": ["I give and give, then quietly resent it when no one notices.", "I struggle to say what I actually need."], "3": ["I measure my worth by what I get done.", "I shape myself into whatever will impress the people around me."], "4": ["I dwell on what's missing in my life.", "I feel misunderstood, even by the people closest to me."], "5": ["I pull away when people need too much from me.", "I hold back from jumping in until I've figured it all out."], "6": ["My mind runs ahead to everything that could go wrong.", "I second-guess myself and look for reassurance."], "7": ["I move on to something new when things get hard or boring.", "I avoid sitting with painful feelings."], "8": ["I come on too strong and can steamroll people.", "I struggle to let people see me vulnerable."], "9": ["I go along with others to avoid conflict.", "I lose track of what I actually want."]};
-const duelLine = (t, k) => k === 0 ? CORE[t][0] : STRUGGLE[t][k - 1];
+// Head-to-heads alternate a gift ("lights you up") and a struggle: CORE 0, STRUGGLE 0, CORE 1, STRUGGLE 1, CORE 2.
+const duelLine = (t, k) => k % 2 === 0 ? CORE[t][k / 2] : STRUGGLE[t][(k - 1) / 2];
 
 // Tiebreakers for commonly confused pairs, asked only when both reach the final round.
 const TIE = {
@@ -469,24 +478,26 @@ const T = {
   9: { name: "The Peacemaker", gift: "Peace. Helping people understand each other.", struggle: "Losing track of what you want.", heart: "Learning that biblical peacemaking often means engaging and speaking the truth in love, not avoiding it.", verse: "Matthew 5:9" },
 };
 const SCALE = ["Never", "Rarely", "Sometimes", "Often", "Almost always"];
+const PICK_PAUSE = 700;   // ms a tapped answer stays highlighted before the next question
+let picking = null;   // the pending timer; any re-render (Back, navigation) cancels it
 const ARROWS = { 1: [4, 7], 2: [8, 4], 3: [9, 6], 4: [2, 1], 5: [7, 8], 6: [3, 9], 7: [1, 5], 8: [5, 2], 9: [6, 3] };
 const WINGS = (t) => [t === 1 ? 9 : t - 1, t === 9 ? 1 : t + 1];
 const TYPES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const hash = (s) => { let x = 2166136261; for (const c of String(s)) x = Math.imul(x ^ c.charCodeAt(0), 16777619); return x >>> 0; };
 const ROTATION = [...TYPES].sort((a, b) => hash("r" + a) - hash("r" + b));
-// Round 1: the first two statements of every type, mixed together.
-const ROUND1 = [0, 1].flatMap((k) => ROTATION.map((t) => `${t}.${k}`)).sort((a, b) => hash("o" + a) - hash("o" + b));
+// Round 1: the first three statements of every type, mixed together, so no type is set aside on only two answers.
+const ROUND1 = [0, 1, 2].flatMap((k) => ROTATION.map((t) => `${t}.${k}`)).sort((a, b) => hash("o" + a) - hash("o" + b));
 
 // Tuning: who stays in the running.
 const KEEP_AFTER_ROUND1 = 4;   // at least this many types go on to round 2
 const ROUND2_MAX = 6;          // statements per type in round 2
 const CLOSE_MAX = 8;           // the top two get up to this many when they're within CLOSE_GAP
 const CLOSE_GAP = 0.3;
-const TIE_GAP = 0.75;          // ask a pair's tiebreakers only when they're this close
 const DROP_GAP = 1.0;          // set a type aside when its average trails the leader by this much
-const CLEAR_GAP = 1.5;         // skip the final round when the leader is this far ahead
-const DUEL_WEIGHT = 0.1;       // each head-to-head win or loss moves a finalist this much on the 0-4 scale
-const DUEL_CAP = 0.3;          // the final round can move a finalist at most this much either way
+const CLEAR_GAP = 1.5;         // end round 2 early when the leader is this far ahead
+const DUEL_WEIGHT = 0.15;      // each head-to-head win or loss moves a finalist this much on the 0-4 scale
+const DUEL_CAP = 0.6;          // the final round can move a finalist at most this much either way
+const DUEL_BEST_OF = 5;        // head-to-heads per pair of finalists
 
 const KEY = "yada-type-finder-v6";
 let st = (() => { const o = load(); return o && o.mode !== "other" ? o : fresh(); })();  // answers given about someone else (no longer offered) start fresh
@@ -533,23 +544,24 @@ function plan(s) {
   const cap = (t) => close && rk.slice(0, 2).includes(t) ? CLOSE_MAX : ROUND2_MAX;
   const need = settled ? [] : alive.filter((t) => base(t) < cap(t)).sort((a, b) => base(a) - base(b) || ROTATION.indexOf(a) - ROTATION.indexOf(b));
   if (need.length && (alive.length > 2 || close) || need.some((t) => base(t) < 4)) {
-    const t = need[0]; return { kind: "s", key: `${t}.${base(t)}`, round: 2, alive, out1 };
+    const t = need[0], k = BANK[t].findIndex((_, i) => !(`${t}.${i}` in s.ans));   // the first unanswered one: the final round asks them out of order
+    return { kind: "s", key: `${t}.${k}`, round: 2, alive, out1 };
   }
   const ranked2 = [...alive].sort(byAvg(r));
   let finalists = ranked2.slice(0, 3).filter((t) => r[t].avg >= r[ranked2[0]].avg - 1.25);
   if (finalists.length < 2) finalists = ranked2.slice(0, 2);
-  if (r[finalists[0]].avg - r[finalists[1]].avg >= CLEAR_GAP) finalists = [finalists[0]];
-  for (let i = 0; i < finalists.length; i++) for (let j = i + 1; j < finalists.length; j++) {
-    // Only for pairs involving the leader that are still close.
-    if (i !== 0 || Math.abs(r[finalists[0]].avg - r[finalists[j]].avg) > TIE_GAP) continue;
-    const pair = [finalists[i], finalists[j]].sort((x, y) => x - y).join("-"), list = TIE[pair] || [];
-    const k = list.findIndex((_, n) => !(`x:${pair}:${n}` in s.ans));
-    if (k >= 0) return { kind: "s", key: `x:${pair}:${k}`, round: 3, alive, out1, finalists };
-  }
-  for (let i = 0; i < finalists.length; i++) for (let j = i + 1; j < finalists.length; j++) {
-    const [a, b] = [finalists[i], finalists[j]].sort((x, y) => x - y), key = `${a}-${b}`, res = s.duel[key] || [];
-    const winsA = res.filter((x) => x === "a").length, winsB = res.filter((x) => x === "b").length;
-    if (res.length < 3 && winsA < 2 && winsB < 2) return { kind: "d", key, a, b, k: res.length, round: 3, alive, out1, finalists };
+  // The final round (one length for everyone, about 10 minutes in all): every remaining statement
+  // for the finalists and every tiebreaker between them, shuffled together so no run of one type
+  // gives the answer away, then a full set of head-to-heads for each pair.
+  const pairs = finalists.flatMap((x, i) => finalists.slice(i + 1).map((y) => [x, y].sort((m, n) => m - n)));
+  const deeper = [
+    ...finalists.flatMap((t) => BANK[t].map((_, k) => `${t}.${k}`)),
+    ...pairs.flatMap(([x, y]) => (TIE[`${x}-${y}`] || []).map((_, n) => `x:${x}-${y}:${n}`)),
+  ].filter((key) => !(key in s.ans)).sort((m, n) => hash("d" + m) - hash("d" + n));
+  if (deeper.length) return { kind: "s", key: deeper[0], round: 3, alive, out1, finalists };
+  for (const [a, b] of pairs) {
+    const key = `${a}-${b}`, res = s.duel[key] || [];
+    if (res.length < DUEL_BEST_OF) return { kind: "d", key, a, b, k: res.length, round: 3, alive, out1, finalists };
   }
   const first = rankFinal(s, r, finalists)[0];
   const avgs = TYPES.map((t) => r[t].avg);
@@ -595,6 +607,7 @@ const other = () => false;
 const who = () => other() ? (st.about.trim() || "them") : "you";
 
 function render() {
+  clearTimeout(picking); picking = null;
   const head = `<header><div class="mark" aria-hidden="true">י</div><div class="brand">Yada<small>Type finder · draft for testing</small></div></header>`;
   let body;
   if (location.hash === "#results") body = inboxView();
@@ -616,7 +629,7 @@ const SHARE_URL = "https://studio2918.github.io/yada/";
 // Web3Forms access key: "Send to the Yada team" emails results to the address this key was made for.
 // Leave it empty to hide the button. The key is meant to be public; it can only send to that one address.
 const FEEDBACK_KEY = "6aa15749-8b17-49e7-aff0-949acd54fe3c";
-const INVITE = `Hey! I'm building an app called Yada and would love your help testing one piece of it. It's a short Enneagram test (5–10 minutes): ${SHARE_URL}
+const INVITE = `Hey! I'm building an app called Yada and would love your help testing one piece of it. It's a short Enneagram test (about 10 minutes): ${SHARE_URL}
 
 When you finish, read through your result, fill in the "Does this sound like you?" box near the end, tap "Share my results," and send it to me. Honest feedback helps the most, especially if the result feels wrong!`;
 let isOwner = false;
@@ -641,7 +654,7 @@ function intro() {
   return `
   <section class="stack">
     <h1>${other() ? `Discover what drives ${h(who())}` : "Discover what drives you"}</h1>
-    <p class="muted">This finder suggests ${other() ? "their" : "your"} likely Enneagram type: possible patterns in ${other() ? "their" : "your"} motivations, strengths, and blind spots. It takes 5–10 minutes, starting with a short read on what the Enneagram is and isn't.</p>
+    <p class="muted">This finder suggests ${other() ? "their" : "your"} likely Enneagram type: possible patterns in ${other() ? "their" : "your"} motivations, strengths, and blind spots. It takes about 10 minutes, starting with a short read on what the Enneagram is and isn't.</p>
   </section>
   <div class="panel">
     <span class="eyebrow">How it works</span>
@@ -661,9 +674,13 @@ function intro() {
 
 const ROUND_NAMES = ["Getting to know you", "Narrowing it down", "Final round", "Your wing"];
 function stageBar(p) {
-  const left = p.round === 1 ? `${ROUND1.filter((k) => !(k in st.ans)).length} left in this round` : p.round === 2 ? `${p.alive.length} types still in the running` : p.round === 3 ? `${p.finalists.length} finalists` : `${6 - Object.keys(st.ans).filter((k) => k.startsWith("w:")).length} left`;
-  return `<div class="stages" aria-hidden="true">${[1, 2, 3, 4].map((n) => `<span class="${n <= p.round ? "on" : ""}"></span>`).join("")}</div>
-  <span class="eyebrow">${ROUND_NAMES[p.round - 1]} · ${left}</span>`;
+  // No countdown: round 1 and the wing round fill their bar segment as you go; rounds 2 and 3 name how far it has narrowed.
+  const wingDone = Object.keys(st.ans).filter((k) => k.startsWith("w:")).length;
+  const fill = p.round === 1 ? ROUND1.filter((k) => k in st.ans).length / ROUND1.length : p.round === 4 ? wingDone / 6 : 1;
+  const note = p.round === 2 ? ` · ${p.alive.length} types still in the running` : p.round === 3 ? ` · ${p.finalists.length} finalists` : "";
+  const seg = (n) => n < p.round ? ' class="on"' : n > p.round ? "" : ` style="background:linear-gradient(to right, var(--brand) ${Math.round(fill * 100)}%, var(--line) ${Math.round(fill * 100)}%)"`;
+  return `<div class="stages" aria-hidden="true">${[1, 2, 3, 4].map((n) => `<span${seg(n)}></span>`).join("")}</div>
+  <span class="eyebrow">${ROUND_NAMES[p.round - 1]}${note}</span>`;
 }
 
 function textFor(key) {
@@ -684,7 +701,7 @@ function statement(p) {
 function duel(p) {
   const flip = hash(p.key + p.k) % 2, [x, y] = flip ? [p.b, p.a] : [p.a, p.b];
   return `${stageBar(p)}
-  ${p.k === 0 ? `<h2>Which lights ${other() ? h(who()) : "you"} up more?</h2>
+  ${p.k % 2 === 0 ? `<h2>Which lights ${other() ? h(who()) : "you"} up more?</h2>
   <p class="muted small">If both are true, pick the one that comes first without effort, the one that's been true the longest. If you really can't choose, “Both equally” is a fine answer.</p>`
   : `<h2>Which is more honestly ${other() ? "their" : "your"} struggle?</h2>
   <p class="muted small">Pick the one that would be harder to admit, or the one people close to ${other() ? "them" : "you"} would say. If both fit equally, that's a fine answer too.</p>`}
@@ -1430,7 +1447,7 @@ function sendToTeam() {
   }).catch(() => { btn.disabled = false; status.textContent = "Couldn't send just now. Check your connection and try again, or tap Share my results instead."; });
 }
 // Invite someone to take the finder: just the link and a line about it, never the sender's results.
-const FRIEND_INVITE = "I just found out what drives me. Take this and we can compare. It's a 5–10 minute Christ-centered Enneagram test:";
+const FRIEND_INVITE = "I just found out what drives me. Take this and we can compare. It's a 10-minute Christ-centered Enneagram test:";
 function inviteFriend(statusId = "invited") {
   const status = document.getElementById(statusId);
   const copy = () => navigator.clipboard.writeText(`${FRIEND_INVITE} ${SHARE_URL}`)
@@ -1514,12 +1531,17 @@ function wire() {
   on("#reset", () => { st = fresh(); save(); render(); });
   on("#restart", () => { st = fresh(); save(); render(); window.scrollTo(0, 0); });
   on("#back", undo);
-  document.querySelectorAll("[data-v]").forEach((b) => b.onclick = () => {
+  // Show the tapped answer for about half a second, then move on. Further taps are ignored meanwhile.
+  const pick = (b, then) => { if (picking) return;
+    b.classList.add("just");
+    document.querySelectorAll(".rate, .versus, .alt").forEach((x) => x.classList.add("picking"));
+    picking = setTimeout(() => { picking = null; then(); }, PICK_PAUSE); };
+  document.querySelectorAll("[data-v]").forEach((b) => b.onclick = () => pick(b, () => {
     const p = plan(st); st.ans = { ...st.ans, [p.key]: Number(b.dataset.v) }; answer({ s: p.key });
-  });
-  document.querySelectorAll("[data-duel]").forEach((b) => b.onclick = () => {
+  }));
+  document.querySelectorAll("[data-duel]").forEach((b) => b.onclick = () => pick(b, () => {
     const p = plan(st); st.duel = { ...st.duel, [p.key]: [...(st.duel[p.key] || []), b.dataset.duel] }; answer({ d: p.key });
-  });
+  }));
   if ($("#translation")) $("#translation").onchange = (e) => set({ translation: e.target.value });
   if ($("#sure")) $("#sure").onchange = (e) => set({ sure: e.target.value });
   for (const id of ["tname", "note"]) if ($("#" + id)) $("#" + id).oninput = (e) => { st[id] = e.target.value; save(); };
