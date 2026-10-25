@@ -104,6 +104,17 @@ details.panel.more > summary { color: var(--ink); font-family: var(--display); f
 .breath { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: baseline; }
 .breath strong { font-family: var(--display); font-weight: 400; font-size: 21px; }
 .aboutnote { background: transparent; }
+.tabpane { display: flex; flex-direction: column; gap: 22px; }
+.tabpane[hidden] { display: none; }
+.tabpane > .chapter:first-child { margin-top: 0; padding-top: 4px; border-top: 0; }
+.hero.compact h1 { font-size: 24px; }
+.hero.compact > p { display: none; }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; background: var(--surface); border-top: 1px solid var(--line); padding: 6px max(6px, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -4px 16px rgba(0, 0, 0, .06); }
+.tabbar button { background: none; border: 0; border-radius: 10px; color: var(--ink-soft); font-weight: 600; font-size: 13px; padding: 11px 2px; line-height: 1.15; }
+.tabbar button[aria-current="page"] { color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, transparent); }
+main:has(.tabbar) { padding-bottom: 120px; }
+main:has(.tabbar) .fbbar { bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 700px) { .tabbar { max-width: 640px; margin: 0 auto; border: 1px solid var(--line); border-bottom: 0; border-radius: 16px 16px 0 0; } }
 .aboutq { display: flex; flex-direction: column; gap: 8px; }
 .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 460px; }
 .seg .chipbtn { width: 100%; min-height: 44px; padding: 8px 6px; font-size: 15px; border-radius: 12px; text-align: center; line-height: 1.2; }
@@ -186,6 +197,10 @@ code.share { user-select: all; -webkit-user-select: all; display: block; font-si
   .small { font-size: 9pt; }
   .noprint, button, select, label[for="translation"] { display: none !important; }
   details > summary::before { display: none !important; }
+  .tabpane[hidden] { display: flex !important; }
+  .liferow { display: block !important; overflow: visible !important; }
+  .lifecard { width: auto !important; max-width: none !important; margin-bottom: 8px; break-inside: avoid; }
+  .hero.compact h1 { font-size: 24pt; } .hero.compact > p { display: block; }
   .chapter { margin-top: 8px; padding-top: 10px; }
   .printonly { display: block !important; }
   a { color: inherit; }
@@ -724,9 +739,14 @@ function result() {
       <div class="stack" style="gap:12px;margin-top:10px">${runners.map((t) => `<div class="stack" style="gap:4px"><h3>Type ${t}, ${T[t].name}</h3>
         <p class="small"><strong>${they ? "A strength they may bring" : "A strength you may bring"}:</strong> ${h(T[t].gift)}</p>
         <p class="small muted"><strong>Where growth may be needed:</strong> ${h(T[t].struggle)}</p></div>`).join("")}</div></details>` : "";
+  // Results are split into five tabs (2026-10-24). Every tab is rendered; only the chosen one is shown, so the PDF and print can show them all.
+  const tabs = flat ? null : [["you", "You"], ["grow", "Grow"], ["week", "This week"], ["people", "People"], ["more", "More"]];
+  const tab = tabs ? (tabs.find(([k]) => location.hash === "#r-" + k) || tabs[0])[0] : null;
+  const pane = (k) => tabs ? `<div class="tabpane" data-tab="${k}"${k === tab ? "" : " hidden"}>` : "<div class=\"tabpane\">";
+  const L = flat ? [] : orderLives(DISC.types[first].lives);
   const jumps = [["ch-you", they ? "Them" : "You"], !flat && ["ch-christ", "Scripture"], !flat && !they && ["ch-week", "This week"], !flat && !they && ["ch-others", "People"], !they && ["sendpanel", "Feedback"]].filter(Boolean);
   return `
-  <section class="stack hero">
+  <section class="stack hero${tab && tab !== "you" ? " compact" : ""}">
     <span class="eyebrow">${they ? `Your view of ${h(who())}` : "Your likely type"} · still exploring</span>
     <h1>${flat ? "No type stood out yet" : `Type ${first}, ${myName(first)}`}</h1>
     ${flat || they ? "" : `<p class="muted small" style="margin-top:-8px">${h(nameLine(first))}</p>`}
@@ -734,8 +754,8 @@ function result() {
     ${they ? "" : `<p class="small noprint"><button type="button" class="linkish" id="tofeedback">Read through your results, then tell us how well they fit ↓</button></p>`}
   </section>
   ${flat ? `<p class="note small">That's common when every statement feels “sometimes true.” Try again picturing one specific season of your life.</p>` : ""}
-  ${jumps.length > 1 ? `<nav class="jump noprint" aria-label="Jump to a part of ${yo} results">${jumps.map(([id, l]) => `<button type="button" class="chipbtn" data-jump="${id}">${l}</button>`).join("")}</nav>` : ""}
 
+  ${pane("you")}
   ${chapter("ch-you", 1, they ? `Knowing ${h(who())}` : "Know yourself", they ? "" : "Patterns to notice honestly, not a verdict about who you are.")}
   <div class="panel" id="typepanel">
     ${top.length ? (() => { const t = top[0]; return `<span class="tag">${flat ? "Loose starting point" : "Most likely"}</span>${flat ? `<h3>Type ${t}, ${T[t].name}</h3>` : ""}
@@ -750,6 +770,8 @@ function result() {
   ${wingsPanel}
   ${flat || they ? "" : namePanel(first)}
   ${flat || they ? "" : temptPanel(first)}
+  </div>
+  ${pane("grow")}
 
   ${flat ? "" : (() => { const d = DISC.types[first]; return `${chapter("ch-christ", 2, "Know Christ", h(DISC.intro.paras[DISC.intro.paras.length - 1]))}
   <div class="panel" id="discpanel"><span class="eyebrow">In light of Scripture</span>
@@ -759,9 +781,22 @@ function result() {
     <p class="note"><strong>A question for ${they ? "the heart" : "your heart"}:</strong> ${h(d.heart)}</p>
     ${they ? "" : formDeeper(first).replace('class="fric"', 'class="more"')}
   </div>`; })()}
-  ${week ? `<div class="panel" id="ch-week"><span class="eyebrow">This week</span>
+  ${flat ? "" : `<div class="panel" id="livespanel"><span class="eyebrow">Biblical lives to learn from</span>
+    <div class="lifeblock"><div class="liferow-head"><span class="muted small">Swipe to see each person</span>
+      <span class="liferow-nav"><span class="muted small" data-lifecount="${first}">1 of ${L.length}</span><button type="button" class="secondary arrow" data-lifego="${first}" data-dir="-1" aria-label="Previous person">\u2190</button><button type="button" class="secondary arrow" data-lifego="${first}" data-dir="1" aria-label="Next person">\u2192</button></span></div>
+      <div class="liferow" data-liferow="${first}" tabindex="0" aria-label="People in Scripture">${L.map((l) => `<div class="lifecard">${life(l)}</div>`).join("")}</div></div>
+    <div class="row"><button type="button" class="secondary" id="tobible">See all nine types</button></div>
+  </div>
+  <div class="panel noprint"><span class="eyebrow">Becoming like Christ</span>
+    <p class="small">How growth happens, rest and Sabbath, practices that make room for God, and life with other believers.</p>
+    <div class="row"><button type="button" class="secondary" id="togrowpage">Read: How we grow</button></div>
+  </div>`}
+  </div>
+  ${pane("week")}
+  ${week ? `<section class="chapter"><span class="eyebrow">A new verse and prayer each week</span><h2>This week</h2></section>
+    <div class="panel" id="ch-week"><span class="eyebrow">Memory verse \u00b7 ${week.ref}</span>
       <h3>${h(week.id)}</h3>
-      <div class="stack" style="gap:8px"><span class="eyebrow">Memory verse · ${week.ref}</span>
+      <div class="stack" style="gap:8px">
         ${(st.translation || "NIV") === "KJV" ? `<p class="verse">“${h(week.verse)}”</p><p class="muted small">${week.ref} (KJV)</p>`
           : `<p><a href="${bgLink(week.ref, st.translation || "NIV")}" target="_blank" rel="noopener">Read ${week.ref} in the ${st.translation || "NIV"}</a></p>
              <p class="muted small">Write it on a card or in your phone's notes and read it each morning this week.</p>`}
@@ -772,15 +807,14 @@ function result() {
     <div class="panel"><span class="eyebrow">Breath prayer</span>
       <p class="breath"><span class="muted small">Breathe in</span><strong>${h(week.inhale)}</strong><span class="muted small">Breathe out</span><strong>${h(week.exhale)}</strong></p>
       <p class="muted small">An original short prayer, not a quotation from Scripture. Pray it slowly whenever it helps you turn your attention to God.</p>
-    </div>
-    <div class="panel"><span class="eyebrow">Biblical lives to learn from</span>
-      ${life(orderLives(DISC.types[first].lives)[0])}
-      <div id="moreppl" hidden>${orderLives(DISC.types[first].lives).slice(1).map((l) => `<div class="stack sub" style="gap:8px">${life(l)}</div>`).join("")}</div>
-      <div class="row" style="justify-content:space-between"><button type="button" class="secondary" id="seeothers" aria-expanded="false" aria-controls="moreppl">See others</button><button type="button" class="secondary" id="tobible" style="margin-left:auto">See all nine</button></div>
     </div>` : ""}
-
+  </div>
+  ${pane("people")}
   ${they || flat ? "" : `${chapter("ch-others", 3, "Love others", "How your tendencies may show up with the people closest to you.")}
   ${relPanelHTML()}`}
+  </div>
+  ${pane("more")}
+  ${tabs ? `<section class="chapter"><span class="eyebrow">Share, feedback, and details</span><h2>More</h2></section>` : ""}
 
   ${they ? "" : `<div class="panel noprint callout" id="sendpanel">
     <span class="eyebrow">Your feedback</span>
@@ -851,6 +885,8 @@ function result() {
   </div>
   ${they ? "" : `<div class="fbbar noprint" id="fbbar" hidden><button type="button" id="fbbarbtn">Tell us how it fits ↓</button><button type="button" class="fbx" id="fbbarx" aria-label="Hide this reminder">×</button></div>`}
   <div class="row"><button type="button" class="secondary" id="back">Change my last answer</button><button type="button" class="secondary" id="restart">Start over</button></div>
+  </div>
+  ${tabs ? `<nav class="tabbar noprint" aria-label="Results sections">${tabs.map(([k, l]) => `<button type="button" data-tab="${k}"${k === tab ? ' aria-current="page"' : ""}>${l}</button>`).join("")}</nav>` : ""}
   <p class="printonly muted small">Yada type finder · A Studio 2918 project · ${SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "")} · ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>`;
 }
 
@@ -1227,7 +1263,11 @@ function loadPdfLib() {
 // Each section is measured first (a dry run), so it moves to a new page whole instead of splitting,
 // unless it's a long section (over a quarter page) with real room left, which then flows on. Paragraphs never split.
 // Collapsed parts ("+") are opened while printing or building the PDF, so nothing is left out, then restored.
-const openAllDetails = () => { const closed = [...document.querySelectorAll("main details:not([open])")].filter((d) => !d.closest(".noprint")); closed.forEach((d) => d.open = true); return () => closed.forEach((d) => d.open = false); };
+const openAllDetails = () => {
+  const closed = [...document.querySelectorAll("main details:not([open])")].filter((d) => !d.closest(".noprint")), panes = [...document.querySelectorAll("main .tabpane[hidden]")];
+  closed.forEach((d) => d.open = true); panes.forEach((p) => p.hidden = false);
+  return () => { closed.forEach((d) => d.open = false); panes.forEach((p) => p.hidden = true); };
+};
 let restoreDetails = null;
 window.addEventListener("beforeprint", () => { restoreDetails = openAllDetails(); });
 window.addEventListener("afterprint", () => { restoreDetails?.(); restoreDetails = null; });
@@ -1396,14 +1436,17 @@ function inviteFriend(statusId = "invited") {
 // Feedback reminders: a floating bar once they're partway through, and a nudge if they share without any.
 const hasFeedback = () => !!(st.feel || st.note.trim() || st.sentAt);
 let fbDismissed = false;  // this visit only
+let lastTab = "", pendingFeedback = false; const tabsSeen = new Set();  // results tabs, this visit only
 function updateFeedbackBar() {
   const bar = document.getElementById("fbbar"), box = document.getElementById("sendpanel");
   if (!bar || !box) return;
   const read = (scrollY + innerHeight) / document.documentElement.scrollHeight;
+  if (document.querySelector(".tabbar")) { bar.hidden = fbDismissed || hasFeedback() || tabsSeen.size < 2 || lastTab === "more"; return; }
   const past = (document.getElementById("typepanel")?.getBoundingClientRect().bottom ?? 0) < 0;
   bar.hidden = fbDismissed || hasFeedback() || !past || read < 0.25 || box.getBoundingClientRect().top < innerHeight;
 }
 function goToFeedback() {
+  if (document.querySelector(".tabbar") && lastTab !== "more") { pendingFeedback = true; location.hash = "r-more"; return; }
   const box = document.getElementById("sendpanel"); if (!box) return;
   box.scrollIntoView({ behavior: "smooth", block: "start" });
   setTimeout(() => document.getElementById("feel")?.focus({ preventScroll: true }), 500);
@@ -1486,7 +1529,13 @@ function wire() {
   on("#toabout", () => { location.hash = "about"; window.scrollTo(0, 0); });
   on("#seeothers", () => { const m = $("#moreppl"), b = $("#seeothers"); m.hidden = !m.hidden; b.textContent = m.hidden ? "See others" : "Show fewer"; b.setAttribute("aria-expanded", String(!m.hidden)); });
   on("#tobible", () => { location.hash = "bible"; window.scrollTo(0, 0); });
-  on("#toquiz", () => { history.replaceState(null, "", location.pathname); render(); });
+  on("#toquiz", () => { history.replaceState(null, "", location.pathname + (lastTab ? "#r-" + lastTab : "")); render(); window.scrollTo(0, 0); });
+  // Results tabs
+  const curTab = document.querySelector('.tabbar [aria-current="page"]');
+  if (curTab) { lastTab = curTab.dataset.tab; tabsSeen.add(lastTab); updateFeedbackBar(); }
+  document.querySelectorAll(".tabbar [data-tab]").forEach((b) => b.onclick = () => { if (b.dataset.tab !== lastTab) { location.hash = "r-" + b.dataset.tab; window.scrollTo(0, 0); } });
+  on("#togrowpage", () => { location.hash = "grow"; window.scrollTo(0, 0); });
+  if (pendingFeedback && lastTab === "more") { pendingFeedback = false; setTimeout(goToFeedback, 60); }
 }
 
 window.addEventListener("hashchange", render);
