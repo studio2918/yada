@@ -49,6 +49,7 @@ p { margin: 0; }
 .stack { display: flex; flex-direction: column; gap: 14px; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button, a, input, select, textarea, label { -webkit-tap-highlight-color: transparent; }   /* no blue flash on Android taps */
 button { font: inherit; font-weight: 700; border-radius: 999px; border: 1px solid var(--brand); background: var(--brand); color: var(--brand-ink); padding: 10px 20px; cursor: pointer; }
 button.secondary { background: transparent; color: var(--brand); }
 button:disabled { opacity: .45; cursor: not-allowed; }
@@ -85,6 +86,8 @@ textarea { min-height: 70px; font-size: 14px; }
 .statement, .versus { animation: qin .3s ease-out; }
 @media (prefers-reduced-motion: reduce) { .statement, .versus { animation: none; } }
 .rate button.just, .side.just, .alt button.just { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); box-shadow: none; }
+/* Answers turn brown the moment a finger touches them (Android's own blue tap box is turned off below). */
+.rate button.press, .versus .side.press, .alt button.press { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); box-shadow: none; }
 .statement { font-family: var(--display); font-size: 26px; line-height: 1.35; text-wrap: balance; min-height: 3.2em; }
 .stages { display: flex; gap: 6px; }
 .stages span { flex: 1; height: 6px; border-radius: 99px; background: var(--line); }
@@ -659,7 +662,10 @@ const who = () => other() ? (st.about.trim() || "them") : "you";
 
 function render() {
   clearTimeout(picking); picking = null;
-  const head = `<header><div class="mark" aria-hidden="true">י</div><div class="brand">Yada<small>Type finder · draft for testing</small></div></header>`;
+  // In the app, the login page takes the whole screen until the person signs in or continues without an account.
+  const gate = window.YadaNative?.gateHTML?.();
+  if (gate) { document.getElementById("app").innerHTML = gate; window.YadaNative.wire?.(); return; }
+  const head = `<header><div class="mark" aria-hidden="true">י</div><div class="brand">Yada<small>Type finder · draft for testing</small></div>${window.YadaNative?.accountLinkHTML?.() || ""}</header>${window.YadaNative?.noticeHTML?.() || ""}`;
   let body;
   if (ORGANIZER && location.hash === "#results") body = inboxView();
   else if (location.hash === "#about") body = aboutView();
@@ -1653,6 +1659,11 @@ function wire() {
 
 // A new page always opens at its top, including plain links like "Keep reading: how we grow".
 window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+// Redraw in place, keeping the scroll position (the app's account and Face ID panels use this).
+window.addEventListener("yada:redraw", render);
+// An answer turns brown the moment a finger touches it; the touch turning into a scroll clears it.
+document.addEventListener("pointerdown", (e) => { const b = e.target.closest?.(".rate button, .versus .side, .alt button"); if (b && !picking) b.classList.add("press"); });
+["pointerup", "pointercancel"].forEach((t) => document.addEventListener(t, () => document.querySelectorAll(".press").forEach((b) => b.classList.remove("press"))));
 window.addEventListener("scroll", updateFeedbackBar, { passive: true });
 function updateBackbar() {
   const bar = document.querySelector(".backbar"); if (!bar) return;
